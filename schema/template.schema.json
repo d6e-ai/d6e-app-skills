@@ -7,12 +7,12 @@
   "properties": {
     "name": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
       "description": "App name (lowercase, hyphens allowed)"
     },
     "namespace": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
       "description": "Author or organization namespace"
     },
     "version": {
@@ -182,6 +182,7 @@
             "type": { "type": "string", "enum": ["Const", "Variable"] },
             "value": { "description": "Static value (Const) or field path string (Variable)" }
           },
+          "additionalProperties": false,
           "description": "Mapping source: Const (static value) or Variable (field path)"
         },
         "target": { "type": "string", "description": "Target field name in the step input" }
