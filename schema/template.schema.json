@@ -67,7 +67,7 @@
         "output_schema": { "type": "object", "description": "JSON Schema for output validation" }
       },
       "additionalProperties": false,
-      "if": { "properties": { "runtime": { "const": "docker" } } },
+      "if": { "required": ["runtime"], "properties": { "runtime": { "const": "docker" } } },
       "then": { "required": ["image"] },
       "else": { "required": ["source"] }
     },
