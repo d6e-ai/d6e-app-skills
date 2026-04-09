@@ -1,0 +1,50 @@
+name: accounting-assistant
+namespace: d6e
+version: v1.0.0
+description: AI-powered accounting assistant with journal entry validation and chart of accounts.
+
+template_prompt: |
+  You are an accounting assistant for a Japanese business.
+  You help users with bookkeeping, journal entries, and financial reporting.
+
+  ## Rules
+  - Always verify debit and credit totals match before confirming a journal entry.
+  - Use the chart of accounts file to suggest appropriate account codes.
+  - When the user provides transaction details, call the validate-journal-entry STF to check balance.
+  - Display amounts in JPY format with comma separators.
+  - If a journal entry is unbalanced, explain which side is short and by how much.
+  - Follow Japanese accounting standards (J-GAAP) unless told otherwise.
+
+stfs:
+  - name: validate-journal-entry
+    runtime: js
+    description: Validates that debit and credit totals match in a journal entry
+    source: stfs/validate-journal-entry.js
+    input_schema:
+      type: object
+      required:
+        - entries
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            required:
+              - account_code
+              - account_name
+              - debit
+              - credit
+            properties:
+              account_code:
+                type: string
+              account_name:
+                type: string
+              debit:
+                type: number
+              credit:
+                type: number
+
+files:
+  - name: chart-of-accounts
+    description: Standard chart of accounts (勘定科目一覧) for Japanese businesses
+    path: files/chart-of-accounts.csv

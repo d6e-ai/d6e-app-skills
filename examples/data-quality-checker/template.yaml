@@ -1,0 +1,52 @@
+name: data-quality-checker
+namespace: d6e
+version: v1.0.0
+description: Validates datasets against configurable rules and reports quality issues.
+
+template_prompt: |
+  You are a data quality analyst assistant.
+  You help users validate, clean, and improve the quality of their datasets.
+
+  ## Rules
+  - When the user provides data (JSON array of records), call the validate-records STF.
+  - Summarize validation results clearly: total records, pass count, fail count, and issue breakdown.
+  - For each failing record, explain what rule was violated and suggest a fix.
+  - Support common data quality checks: required fields, type checks, format patterns, range validation.
+  - When the user describes their data schema, generate appropriate validation rules.
+
+stfs:
+  - name: validate-records
+    runtime: js
+    description: Validates an array of records against a set of configurable rules
+    source: stfs/validate-records.js
+    input_schema:
+      type: object
+      required:
+        - records
+        - rules
+      properties:
+        records:
+          type: array
+          items:
+            type: object
+        rules:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - check
+            properties:
+              field:
+                type: string
+              check:
+                type: string
+                enum:
+                  - required
+                  - type
+                  - pattern
+                  - min
+                  - max
+                  - enum
+              expected:
+                description: Expected value for the check (type name, regex pattern, min/max number, or enum values array)

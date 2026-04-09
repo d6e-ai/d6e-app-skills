@@ -1,0 +1,38 @@
+code,name_ja,name_en,category,subcategory
+100,現金,Cash,assets,current
+110,普通預金,Ordinary deposits,assets,current
+111,当座預金,Checking deposits,assets,current
+120,売掛金,Accounts receivable,assets,current
+130,商品,Merchandise,assets,current
+140,前払費用,Prepaid expenses,assets,current
+150,未収入金,Accrued revenue,assets,current
+200,建物,Buildings,assets,fixed
+210,車両運搬具,Vehicles,assets,fixed
+220,備品,Equipment,assets,fixed
+230,土地,Land,assets,fixed
+240,ソフトウェア,Software,assets,intangible
+300,買掛金,Accounts payable,liabilities,current
+310,短期借入金,Short-term borrowings,liabilities,current
+320,未払金,Accrued expenses,liabilities,current
+330,未払費用,Accrued expenses payable,liabilities,current
+340,預り金,Deposits received,liabilities,current
+350,前受金,Advances received,liabilities,current
+400,長期借入金,Long-term borrowings,liabilities,non_current
+500,資本金,Capital stock,equity,capital
+510,資本剰余金,Capital surplus,equity,capital
+520,利益剰余金,Retained earnings,equity,retained
+600,売上高,Sales revenue,revenue,operating
+610,受取利息,Interest income,revenue,non_operating
+620,雑収入,Miscellaneous income,revenue,non_operating
+700,仕入高,Cost of goods sold,expense,cost
+710,給料手当,Salaries and allowances,expense,selling
+720,法定福利費,Legal welfare expenses,expense,selling
+730,旅費交通費,Travel and transportation,expense,selling
+740,通信費,Communication expenses,expense,selling
+750,消耗品費,Supplies expense,expense,selling
+760,水道光熱費,Utilities,expense,selling
+770,地代家賃,Rent,expense,selling
+780,減価償却費,Depreciation,expense,selling
+790,支払利息,Interest expense,expense,non_operating
+800,雑損失,Miscellaneous losses,expense,non_operating
+900,法人税等,Corporate tax,tax,tax
