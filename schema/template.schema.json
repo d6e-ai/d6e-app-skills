@@ -208,7 +208,33 @@
           "description": "Effect name reference (for effect steps)"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "input" } }
+          },
+          "then": {
+            "required": ["source"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "stf" } }
+          },
+          "then": {
+            "required": ["stfName"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "effect" } }
+          },
+          "then": {
+            "required": ["effectName"]
+          }
+        }
+      ]
     }
   }
 }
