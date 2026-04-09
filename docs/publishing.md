@@ -1,10 +1,11 @@
 # Publishing to d6e App Marketplace
 
+Apps are **automatically discovered** — no PRs or Issues needed for listing.
+
 ## Prerequisites
 
 - A public GitHub repository containing your app
 - A valid `template.yaml` at the repository root
-- At least one tagged release (e.g., `v1.0.0`)
 
 ## Step 1: Prepare Your Repository
 
@@ -18,70 +19,56 @@ your-org/d6e-app-your-app/
 └── ...
 ```
 
-## Step 2: Create a Release
+## Step 2: Add the `d6e-app` Topic
+
+Go to your GitHub repository → About (gear icon) → Topics → add **`d6e-app`**.
+
+That's it! A scheduled GitHub Action on the marketplace repository scans for all repos with this topic every 6 hours and auto-registers valid apps as **unverified**.
+
+## Step 3 (optional): Tag a Release
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-## Step 3: Submit to Marketplace
+The discovery script reads `template.yaml` from your default branch. Tagging helps users identify stable versions.
 
-1. Fork [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace)
-2. Create a registry entry: `registry/{namespace}/{name}.yaml`
-3. Update `registry/index.yaml` to include your app
-4. Open a Pull Request
+## How Discovery Works
 
-### Registry Entry Format
-
-```yaml
-name: your-app
-namespace: your-org
-description: What your app does (max 200 chars)
-tier: unverified
-repo: https://github.com/your-org/d6e-app-your-app
-category: business  # business | finance | development | example | other
-icon: briefcase     # lucide icon name
-versions:
-  - version: v1.0.0
-    releaseDate: "2026-04-09"
-    manifestUrl: https://raw.githubusercontent.com/your-org/d6e-app-your-app/v1.0.0/template.yaml
-    changelog: Initial release
-    resources:
-      stfs: 2
-      files: 1
-      effects: 0
-      workflows: 1
-readme: |
-  ## Your App
-  Description and usage instructions.
-```
-
-### index.yaml Entry
-
-Add to the `apps` list:
-
-```yaml
-- namespace: your-org
-  name: your-app
-  description: What your app does
-  tier: unverified
-  category: business
-  icon: briefcase
-  latestVersion: v1.0.0
-```
+1. GitHub Action runs on [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) every 6 hours
+2. Searches GitHub for repositories with topic `d6e-app`
+3. Fetches `template.yaml` from each repo's default branch
+4. Validates the schema (name, namespace, version, description are required)
+5. Auto-generates registry entries: `registry/index.yaml` and `registry/{namespace}/{name}.yaml`
+6. `manifestUrl` is auto-derived from the repo URL and version
 
 ## Tier System
 
-| Tier | Badge | Description |
-|------|-------|-------------|
-| **verified** | Green checkmark | Reviewed and approved by d6e team |
-| **unverified** | Yellow warning | Community-submitted, not reviewed |
+| Tier | Badge | How to get | Review |
+|------|-------|-----------|--------|
+| **Verified** | Green | PR to `verified-apps.yaml` | d6e team reviews |
+| **Unverified** | Yellow | Add `d6e-app` topic | Automatic (schema validation only) |
 
-All new submissions start as `unverified`. Contact the d6e team for verification review.
+## Requesting Verified Status
+
+1. Ensure your app is already discovered
+2. Submit a PR to [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) adding your app to `verified-apps.yaml`:
+   ```yaml
+   apps:
+     - namespace: your-org
+       name: your-app
+   ```
+3. The d6e team reviews your app and merges the PR
 
 ## Publishing a New Version
 
-1. Update `template.yaml` version
-2. Tag and push: `git tag v1.1.0 && git push origin v1.1.0`
-3. PR to marketplace: add new entry to `versions[]` array, update `latestVersion` in index.yaml
+1. Update the `version` field in `template.yaml`
+2. (Optional) Tag and push: `git tag v1.1.0 && git push origin v1.1.0`
+3. Wait for the next discovery run (up to 6 hours) or trigger it manually
+
+The discovery script detects version changes and adds new entries to the `versions[]` array.
+
+## Removing from Marketplace
+
+Remove the `d6e-app` topic from your repository. The next discovery run will remove it from the registry.

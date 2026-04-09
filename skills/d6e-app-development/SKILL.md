@@ -330,74 +330,56 @@ my-org/d6e-app-my-app/
 
 ## Publishing to Marketplace
 
+Apps are **automatically discovered** by the marketplace. No PRs or Issues needed.
+
 ### Step 1: Create a public GitHub repository
 
 Follow the directory structure above. The repository root must contain `template.yaml`.
 
-### Step 2: Tag a release
+### Step 2: Add the `d6e-app` topic
+
+Go to your repository's Settings → Topics and add **`d6e-app`**.
+
+That's it. A scheduled GitHub Action on the marketplace scans for all repositories with this topic every 6 hours, validates the `template.yaml`, and auto-registers the app as **unverified**.
+
+### Step 3 (optional): Tag a release
 
 ```bash
 git tag v1.0.0
 git push --tags
 ```
 
-The tag version must match the `version` field in `template.yaml`.
+The discovery script reads `template.yaml` from your default branch. Tagging helps users identify stable versions — the `version` field in `template.yaml` is used as the version identifier.
 
-### Step 3: Submit a PR to d6e-app-marketplace
+### Requesting Verified Status
 
-Fork [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) and add two files:
+To get a green "Verified" badge:
 
-**1. Registry entry** — `registry/{namespace}/{name}.yaml`:
+1. Ensure your app is already discovered (has the `d6e-app` topic and valid `template.yaml`)
+2. Submit a PR to [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) adding your app to `verified-apps.yaml`:
+   ```yaml
+   apps:
+     - namespace: your-org
+       name: your-app
+   ```
+3. The d6e team will review and merge
 
-```yaml
-name: my-app
-namespace: my-org
-description: What my app does
-tier: unverified
-repo: https://github.com/my-org/d6e-app-my-app
-category: business
-icon: briefcase
-versions:
-  - version: v1.0.0
-    releaseDate: "2026-04-09"
-    manifestUrl: https://raw.githubusercontent.com/my-org/d6e-app-my-app/v1.0.0/template.yaml
-    changelog: Initial release
-    resources:
-      stfs: 2
-      files: 1
-      effects: 0
-      workflows: 1
-readme: |
-  ## My App
-  Description of what this app does.
-```
+### Removing from Marketplace
 
-**2. Index update** — Add to `registry/index.yaml`:
-
-```yaml
-- namespace: my-org
-  name: my-app
-  description: What my app does
-  tier: unverified
-  category: business
-  icon: briefcase
-  latestVersion: v1.0.0
-```
-
-The `manifestUrl` must point to the raw GitHub URL for the tagged release, so that d6e instances can fetch the `template.yaml` at install time.
+Remove the `d6e-app` topic from your repository. The next discovery run will remove it.
 
 ### How d6e Instances Find Your App
 
-1. Each d6e instance periodically fetches `registry/index.yaml` from GitHub raw
+1. Each d6e instance fetches `registry/index.yaml` from the marketplace repo (GitHub raw)
 2. The Browse tab on the Apps page displays all entries
-3. When a user clicks Install, d6e fetches `manifestUrl` → gets `template.yaml` → creates resources via Rust API
+3. When a user clicks Install, d6e fetches the `manifestUrl` (auto-derived from your repo URL + version) → gets `template.yaml` → creates resources via Rust API
 
 ### Tier System
 
-- **Verified**: Reviewed and approved by d6e team. Green badge.
-- **Unverified**: Community-submitted, not reviewed. Yellow badge with warning.
-
-New submissions start as `unverified`. Contact the d6e team for verification review.
+| Tier | Badge | How to get | Review |
+|------|-------|-----------|--------|
+| **Verified** | Green | PR to `verified-apps.yaml` | d6e team reviews |
+| **Unverified** | Yellow | Add `d6e-app` topic to repo | Automatic (schema validation only) |
 
 ## Troubleshooting
 
