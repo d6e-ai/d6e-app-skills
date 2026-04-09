@@ -85,7 +85,7 @@ export default function (input) {
     decisions,
     decision_count: decisions.length,
     participants: Array.from(participantSet),
-    word_count: text.split(/\s+/).length,
+    word_count: text.trim().split(/\s+/).length,
     line_count: lines.length,
     unassigned_count: actionItems.filter((a) => a.assignee === 'TBD').length
   };

@@ -29,7 +29,7 @@ export default function (input) {
         error: `Negative amount found in account ${entry.account_code}: debit=${debit}, credit=${credit}`,
         debit_total: debitTotal,
         credit_total: creditTotal,
-        difference: 0,
+        difference: Math.round((debitTotal - creditTotal) * 100) / 100,
         entries: validated
       };
     }
@@ -40,7 +40,7 @@ export default function (input) {
         error: `Account ${entry.account_code} has both debit and credit. Split into separate lines.`,
         debit_total: debitTotal,
         credit_total: creditTotal,
-        difference: 0,
+        difference: Math.round((debitTotal - creditTotal) * 100) / 100,
         entries: validated
       };
     }
