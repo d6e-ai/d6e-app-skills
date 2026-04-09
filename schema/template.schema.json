@@ -177,7 +177,7 @@
       "properties": {
         "source": {
           "type": "object",
-          "required": ["type"],
+          "required": ["type", "value"],
           "properties": {
             "type": { "type": "string", "enum": ["Const", "Variable"] },
             "value": { "description": "Static value (Const) or field path string (Variable)" }
