@@ -1,0 +1,214 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "d6e App Template",
+  "description": "Schema for d6e App template.yaml manifest files.",
+  "type": "object",
+  "required": ["name", "namespace", "version", "description"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "App name (lowercase, hyphens allowed)"
+    },
+    "namespace": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "Author or organization namespace"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "description": "Semver version (e.g., v1.0.0)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Short description of the app"
+    },
+    "template_prompt": {
+      "type": "string",
+      "description": "System prompt injected into AI agent context"
+    },
+    "stfs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/stf"
+      },
+      "description": "State Transition Function definitions"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/file"
+      },
+      "description": "File references"
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/effect"
+      },
+      "description": "Effect (external API) definitions"
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/workflow"
+      },
+      "description": "Workflow pipeline definitions"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "stf": {
+      "type": "object",
+      "required": ["name", "runtime", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "STF identifier"
+        },
+        "runtime": {
+          "type": "string",
+          "enum": ["js", "wasm", "docker"],
+          "description": "Execution runtime"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this STF does"
+        },
+        "source": {
+          "type": "string",
+          "description": "Relative path to source file (for js/wasm)"
+        },
+        "image": {
+          "type": "string",
+          "description": "Docker image reference (for docker runtime)"
+        },
+        "command": {
+          "type": "string",
+          "description": "Docker command override"
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Environment variables (docker only)"
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": { "runtime": { "const": "docker" } }
+      },
+      "then": {
+        "required": ["image"]
+      },
+      "else": {
+        "required": ["source"]
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": ["name", "description", "path"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "File identifier"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this file is for"
+        },
+        "path": {
+          "type": "string",
+          "description": "Relative path to the file"
+        }
+      },
+      "additionalProperties": false
+    },
+    "effect": {
+      "type": "object",
+      "required": ["name", "description", "url", "method"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Effect identifier"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this effect does"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Target URL"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+          "description": "HTTP method"
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Default headers"
+        }
+      },
+      "additionalProperties": false
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["name", "description", "steps"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Workflow identifier"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this workflow does"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/workflowStep"
+          },
+          "minItems": 1,
+          "description": "Ordered list of steps"
+        }
+      },
+      "additionalProperties": false
+    },
+    "workflowStep": {
+      "type": "object",
+      "required": ["type", "name"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["input", "stf", "effect"],
+          "description": "Step type"
+        },
+        "name": {
+          "type": "string",
+          "description": "Step name"
+        },
+        "source": {
+          "type": "string",
+          "description": "Input source type (for input steps)"
+        },
+        "libraryId": {
+          "type": ["string", "null"],
+          "description": "Library ID (resolved at install time)"
+        },
+        "stfName": {
+          "type": "string",
+          "description": "STF name reference (for stf steps)"
+        },
+        "effectName": {
+          "type": "string",
+          "description": "Effect name reference (for effect steps)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
