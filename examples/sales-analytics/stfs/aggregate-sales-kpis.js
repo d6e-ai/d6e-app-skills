@@ -6,7 +6,7 @@ export default function (input) {
   const groupBy = input.group_by || 'month';
 
   if (records.length === 0) {
-    return { groups: [], totals: { revenue: 0, count: 0, avg_deal: 0 } };
+    return { groups: [], totals: { revenue: 0, transaction_count: 0, avg_deal_size: 0 }, group_by: groupBy, record_count: 0 };
   }
 
   const groups = {};

@@ -7,7 +7,7 @@ export default function (input) {
   const rules = input.rules || [];
 
   if (records.length === 0) {
-    return { total: 0, passed: 0, failed: 0, issues: [], summary: {} };
+    return { total: 0, passed: 0, failed: 0, pass_rate: 100, failing_records: [], summary: [] };
   }
 
   const results = [];
@@ -40,7 +40,9 @@ export default function (input) {
 
   const summary = Object.entries(issueCounts)
     .map(([key, count]) => {
-      const [field, check] = key.split(':');
+      const separatorIndex = key.lastIndexOf(':');
+      const field = key.substring(0, separatorIndex);
+      const check = key.substring(separatorIndex + 1);
       return { field, check, count };
     })
     .sort((a, b) => b.count - a.count);

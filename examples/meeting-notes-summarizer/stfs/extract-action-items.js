@@ -61,12 +61,23 @@ export default function (input) {
       }
     }
 
-    const namePattern = language === 'ja'
-      ? /^([^\s:：]+)[さん]?[:：]/
-      : /^([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)[:]/;
-    const nameMatch = line.match(namePattern);
-    if (nameMatch) {
-      participantSet.add(nameMatch[1].trim());
+    let matchedAction = false;
+    for (const pattern of actionPatterns) {
+      if (line.match(pattern)) { matchedAction = true; break; }
+    }
+    let matchedDecision = false;
+    for (const pattern of decisionPatterns) {
+      if (line.match(pattern)) { matchedDecision = true; break; }
+    }
+
+    if (!matchedAction && !matchedDecision) {
+      const namePattern = language === 'ja'
+        ? /^([^\s:：]+)(?:さん)?[:：]/
+        : /^([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)[:]/;
+      const nameMatch = line.match(namePattern);
+      if (nameMatch) {
+        participantSet.add(nameMatch[1].trim());
+      }
     }
   }
 
