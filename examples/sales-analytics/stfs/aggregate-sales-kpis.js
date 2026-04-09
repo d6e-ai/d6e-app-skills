@@ -69,13 +69,13 @@ function getGroupKey(record, groupBy) {
   switch (groupBy) {
     case 'month': {
       const d = new Date(record.date);
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
     }
     case 'week': {
       const d = new Date(record.date);
-      const jan1 = new Date(d.getFullYear(), 0, 1);
-      const weekNum = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
-      return `${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+      const jan1 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const weekNum = Math.ceil(((d - jan1) / 86400000 + jan1.getUTCDay() + 1) / 7);
+      return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
     }
     case 'product':
       return record.product || 'unknown';

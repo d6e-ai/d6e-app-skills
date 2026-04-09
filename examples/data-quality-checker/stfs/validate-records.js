@@ -7,7 +7,7 @@ export default function (input) {
   const rules = input.rules || [];
 
   if (records.length === 0) {
-    return { total: 0, passed: 0, failed: 0, pass_rate: 100, failing_records: [], summary: [] };
+    return { total: 0, passed: 0, failed: 0, pass_rate: 0, failing_records: [], summary: [] };
   }
 
   const results = [];

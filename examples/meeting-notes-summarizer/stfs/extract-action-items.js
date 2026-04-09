@@ -31,9 +31,13 @@ export default function (input) {
   const participantSet = new Set();
 
   for (const line of lines) {
+    let matchedAction = false;
+    let matchedDecision = false;
+
     for (const pattern of actionPatterns) {
       const match = line.match(pattern);
       if (match) {
+        matchedAction = true;
         const content = match[1].trim();
         const assigneeMatch = content.match(assigneePattern);
         const deadlineMatch = content.match(deadlinePattern);
@@ -53,21 +57,15 @@ export default function (input) {
       }
     }
 
-    for (const pattern of decisionPatterns) {
-      const match = line.match(pattern);
-      if (match) {
-        decisions.push({ content: match[1].trim(), source_line: line });
-        break;
+    if (!matchedAction) {
+      for (const pattern of decisionPatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          matchedDecision = true;
+          decisions.push({ content: match[1].trim(), source_line: line });
+          break;
+        }
       }
-    }
-
-    let matchedAction = false;
-    for (const pattern of actionPatterns) {
-      if (line.match(pattern)) { matchedAction = true; break; }
-    }
-    let matchedDecision = false;
-    for (const pattern of decisionPatterns) {
-      if (line.match(pattern)) { matchedDecision = true; break; }
     }
 
     if (!matchedAction && !matchedDecision) {

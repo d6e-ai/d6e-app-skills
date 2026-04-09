@@ -53,7 +53,7 @@ export default function (input) {
       account_name: entry.account_name,
       debit,
       credit,
-      side: debit > 0 ? 'debit' : 'credit'
+      side: debit > 0 ? 'debit' : credit > 0 ? 'credit' : 'none'
     });
   }
 
