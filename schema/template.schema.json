@@ -31,30 +31,22 @@
     },
     "stfs": {
       "type": "array",
-      "items": {
-        "$ref": "#/definitions/stf"
-      },
+      "items": { "$ref": "#/definitions/stf" },
       "description": "State Transition Function definitions"
     },
     "files": {
       "type": "array",
-      "items": {
-        "$ref": "#/definitions/file"
-      },
-      "description": "File references"
+      "items": { "$ref": "#/definitions/file" },
+      "description": "File references (uploaded to workspace storage at install time)"
     },
     "effects": {
       "type": "array",
-      "items": {
-        "$ref": "#/definitions/effect"
-      },
+      "items": { "$ref": "#/definitions/effect" },
       "description": "Effect (external API) definitions"
     },
     "workflows": {
       "type": "array",
-      "items": {
-        "$ref": "#/definitions/workflow"
-      },
+      "items": { "$ref": "#/definitions/workflow" },
       "description": "Workflow pipeline definitions"
     }
   },
@@ -64,177 +56,137 @@
       "type": "object",
       "required": ["name", "runtime", "description"],
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "STF identifier"
-        },
-        "runtime": {
-          "type": "string",
-          "enum": ["js", "wasm", "docker"],
-          "description": "Execution runtime"
-        },
-        "description": {
-          "type": "string",
-          "description": "What this STF does"
-        },
-        "source": {
-          "type": "string",
-          "description": "Relative path to source file (for js/wasm)"
-        },
-        "image": {
-          "type": "string",
-          "description": "Docker image reference (for docker runtime)"
-        },
-        "command": {
-          "type": "string",
-          "description": "Docker command override"
-        },
-        "env": {
-          "type": "object",
-          "additionalProperties": { "type": "string" },
-          "description": "Environment variables (docker only)"
-        }
+        "name": { "type": "string", "description": "STF identifier (referenced in workflow stf_name)" },
+        "runtime": { "type": "string", "enum": ["js", "wasm", "docker"], "description": "Execution runtime" },
+        "description": { "type": "string", "description": "What this STF does" },
+        "source": { "type": "string", "description": "Relative path to source file (for js/wasm, read and base64-encoded by installer)" },
+        "image": { "type": "string", "description": "Docker image reference (for docker runtime)" },
+        "command": { "type": "string", "description": "Docker command override" },
+        "env": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Environment variables (docker only)" },
+        "input_schema": { "type": "object", "description": "JSON Schema for input validation" },
+        "output_schema": { "type": "object", "description": "JSON Schema for output validation" }
       },
       "additionalProperties": false,
-      "if": {
-        "properties": { "runtime": { "const": "docker" } }
-      },
-      "then": {
-        "required": ["image"]
-      },
-      "else": {
-        "required": ["source"]
-      }
+      "if": { "properties": { "runtime": { "const": "docker" } } },
+      "then": { "required": ["image"] },
+      "else": { "required": ["source"] }
     },
     "file": {
       "type": "object",
       "required": ["name", "description", "path"],
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "File identifier"
-        },
-        "description": {
-          "type": "string",
-          "description": "What this file is for"
-        },
-        "path": {
-          "type": "string",
-          "description": "Relative path to the file"
-        }
+        "name": { "type": "string", "description": "File identifier" },
+        "description": { "type": "string", "description": "What this file is for" },
+        "path": { "type": "string", "description": "Relative path to file (uploaded via multipart at install time)" }
       },
       "additionalProperties": false
     },
     "effect": {
       "type": "object",
-      "required": ["name", "description", "url", "method"],
+      "required": ["name", "description", "version", "url", "method", "header_mappings", "body_mappings"],
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "Effect identifier"
-        },
-        "description": {
-          "type": "string",
-          "description": "What this effect does"
-        },
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "Target URL"
-        },
-        "method": {
-          "type": "string",
-          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
-          "description": "HTTP method"
-        },
-        "headers": {
-          "type": "object",
-          "additionalProperties": { "type": "string" },
-          "description": "Default headers"
-        }
+        "name": { "type": "string", "description": "Effect identifier (referenced in workflow effect_name)" },
+        "description": { "type": "string", "description": "What this effect does" },
+        "version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$", "description": "Semver version" },
+        "url": { "type": "string", "format": "uri", "description": "Target URL" },
+        "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"], "description": "HTTP method" },
+        "header_mappings": { "type": "object", "description": "Header key-value mappings" },
+        "body_mappings": { "type": "object", "description": "Body field mappings" },
+        "input_schema": { "type": "object", "description": "JSON Schema for input validation" }
       },
       "additionalProperties": false
     },
     "workflow": {
       "type": "object",
-      "required": ["name", "description", "steps"],
+      "required": ["name", "description"],
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "Workflow identifier"
-        },
-        "description": {
-          "type": "string",
-          "description": "What this workflow does"
-        },
-        "steps": {
+        "name": { "type": "string", "description": "Workflow identifier" },
+        "description": { "type": "string", "description": "What this workflow does" },
+        "input_steps": {
           "type": "array",
-          "items": {
-            "$ref": "#/definitions/workflowStep"
-          },
-          "minItems": 1,
-          "description": "Ordered list of steps"
+          "items": { "$ref": "#/definitions/inputStep" },
+          "description": "Input data source steps"
+        },
+        "stf_steps": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/stfStep" },
+          "description": "STF execution steps (stf_name resolved to UUID at install)"
+        },
+        "effect_steps": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/effectStep" },
+          "description": "Effect execution steps (effect_name resolved to UUID at install)"
         }
       },
       "additionalProperties": false
     },
-    "workflowStep": {
+    "inputStep": {
       "type": "object",
-      "required": ["type", "name"],
+      "required": ["name", "source"],
       "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["input", "stf", "effect"],
-          "description": "Step type"
-        },
-        "name": {
-          "type": "string",
-          "description": "Step name"
-        },
-        "source": {
-          "type": "string",
-          "description": "Input source type (for input steps)"
-        },
-        "libraryId": {
-          "type": ["string", "null"],
-          "description": "Library ID (resolved at install time)"
-        },
-        "stfName": {
-          "type": "string",
-          "description": "STF name reference (for stf steps)"
-        },
-        "effectName": {
-          "type": "string",
-          "description": "Effect name reference (for effect steps)"
+        "name": { "type": "string", "description": "Step name (referenced as sources.{name} in mappings)" },
+        "source": { "$ref": "#/definitions/inputSource" },
+        "content_type": { "type": "string", "description": "Expected content type (optional)" }
+      },
+      "additionalProperties": false
+    },
+    "inputSource": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["Library", "File", "Fetch"], "description": "Input source type" },
+        "name": { "type": "string", "description": "Library name (for Library type)" },
+        "id": { "type": "string", "format": "uuid", "description": "File UUID (for File type, resolved at install)" },
+        "url": { "type": "string", "description": "Request URL (for Fetch type)" },
+        "method": { "type": "string", "description": "HTTP method (for Fetch type, default: GET)" },
+        "headers": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Request headers (for Fetch type)" },
+        "body": { "description": "Request body (for Fetch type)" },
+        "timeout_secs": { "type": "integer", "minimum": 1, "maximum": 60, "description": "Timeout in seconds (for Fetch type, default: 30)" }
+      },
+      "additionalProperties": false
+    },
+    "stfStep": {
+      "type": "object",
+      "required": ["stf_name"],
+      "properties": {
+        "stf_name": { "type": "string", "description": "STF name from the stfs list (resolved to stf_version_id UUID at install)" },
+        "input_mappings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/fieldMapping" },
+          "description": "Input field mappings from previous steps"
         }
       },
-      "additionalProperties": false,
-      "allOf": [
-        {
-          "if": {
-            "properties": { "type": { "const": "input" } }
-          },
-          "then": {
-            "required": ["source"]
-          }
-        },
-        {
-          "if": {
-            "properties": { "type": { "const": "stf" } }
-          },
-          "then": {
-            "required": ["stfName"]
-          }
-        },
-        {
-          "if": {
-            "properties": { "type": { "const": "effect" } }
-          },
-          "then": {
-            "required": ["effectName"]
-          }
+      "additionalProperties": false
+    },
+    "effectStep": {
+      "type": "object",
+      "required": ["effect_name"],
+      "properties": {
+        "effect_name": { "type": "string", "description": "Effect name from the effects list (resolved to effect_version_id UUID at install)" },
+        "input_mappings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/fieldMapping" },
+          "description": "Input field mappings from previous steps"
         }
-      ]
+      },
+      "additionalProperties": false
+    },
+    "fieldMapping": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "source": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "type": "string", "enum": ["Const", "Variable"] },
+            "value": { "description": "Static value (Const) or field path string (Variable)" }
+          },
+          "description": "Mapping source: Const (static value) or Variable (field path)"
+        },
+        "target": { "type": "string", "description": "Target field name in the step input" }
+      },
+      "additionalProperties": false
     }
   }
 }
