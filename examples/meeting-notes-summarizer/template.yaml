@@ -1,7 +1,9 @@
 name: meeting-notes-summarizer
 namespace: d6e
 version: v1.0.0
-description: Extracts action items, decisions, and key points from meeting notes and transcripts.
+description:
+  en-US: Extracts action items, decisions, and key points from meeting notes and transcripts.
+  ja-JP: 議事録やトランスクリプトからアクションアイテム、決定事項、要点を抽出します。
 
 template_prompt: |
   You are a meeting notes analyst assistant.

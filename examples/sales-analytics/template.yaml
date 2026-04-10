@@ -1,7 +1,9 @@
 name: sales-analytics
 namespace: d6e
 version: v1.0.0
-description: Sales KPI aggregation with target comparison, Slack alerts, and automated reporting workflow.
+description:
+  en-US: Sales KPI aggregation with target comparison, Slack alerts, and automated reporting workflow.
+  ja-JP: 売上KPI集計、目標比較、Slackアラート、自動レポートワークフロー。
 
 template_prompt: |
   You are a sales analytics assistant.
