@@ -1,7 +1,9 @@
 name: accounting-assistant
 namespace: d6e
 version: v1.0.0
-description: AI-powered accounting assistant with journal entry validation and chart of accounts.
+description:
+  en-US: AI-powered accounting assistant with journal entry validation and chart of accounts.
+  ja-JP: 仕訳検証と勘定科目表を備えたAI搭載の会計アシスタント。
 
 template_prompt: |
   You are an accounting assistant for a Japanese business.

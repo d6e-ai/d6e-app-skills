@@ -1,7 +1,9 @@
 name: data-quality-checker
 namespace: d6e
 version: v1.0.0
-description: Validates datasets against configurable rules and reports quality issues.
+description:
+  en-US: Validates datasets against configurable rules and reports quality issues.
+  ja-JP: 設定可能なルールでデータセットを検証し、品質の問題を報告します。
 
 template_prompt: |
   You are a data quality analyst assistant.

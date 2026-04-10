@@ -21,9 +21,22 @@
       "description": "Semver version (e.g., v1.0.0)"
     },
     "description": {
-      "type": "string",
-      "maxLength": 200,
-      "description": "Short description of the app"
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Short description of the app (single language)"
+        },
+        {
+          "type": "object",
+          "description": "Localized descriptions keyed by locale (e.g. ja-JP, en-US). At least one locale is required.",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      ]
     },
     "template_prompt": {
       "type": "string",
