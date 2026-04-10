@@ -1,0 +1,95 @@
+name: sales-analytics
+namespace: d6e
+version: v1.0.0
+description: Sales KPI aggregation with target comparison, Slack alerts, and automated reporting workflow.
+
+template_prompt: |
+  You are a sales analytics assistant.
+  You help the sales team track performance, analyze trends, and generate reports.
+
+  ## Rules
+  - When given raw sales data, call the aggregate-sales-kpis STF to compute metrics.
+  - Compare actual performance against targets from the sales-targets file.
+  - Highlight KPIs that are below target in red and above target in green.
+  - Present results in table format with period, metric, actual, target, and achievement rate.
+  - Suggest actionable insights based on the data patterns.
+  - When asked to send a summary, use the notify-slack effect.
+
+stfs:
+  - name: aggregate-sales-kpis
+    runtime: js
+    description: Aggregates raw sales records into KPIs by period
+    source: stfs/aggregate-sales-kpis.js
+    input_schema:
+      type: object
+      required:
+        - records
+      properties:
+        records:
+          type: array
+          items:
+            type: object
+            required:
+              - date
+              - amount
+            properties:
+              date:
+                type: string
+              amount:
+                type: number
+              product:
+                type: string
+              rep:
+                type: string
+        group_by:
+          type: string
+          enum:
+            - month
+            - week
+            - product
+            - rep
+          default: month
+
+files:
+  - name: sales-targets
+    description: Monthly sales targets by product line
+    path: files/sales-targets.json
+
+effects:
+  - name: notify-slack
+    description: Posts a sales summary message to a Slack channel
+    version: v1.0.0
+    url: https://hooks.slack.com/services/PLACEHOLDER
+    method: POST
+    header_mappings:
+      Content-Type: application/json
+    body_mappings:
+      text: "$.input.message"
+
+workflows:
+  - name: daily-sales-summary
+    description: Fetches today's sales data, aggregates KPIs, and sends Slack notification
+    input_steps:
+      - name: sales-data
+        source:
+          type: Fetch
+          url: https://api.example.com/sales/today
+          method: GET
+    stf_steps:
+      - stf_name: aggregate-sales-kpis
+        input_mappings:
+          - source:
+              type: Variable
+              value: sources.sales-data
+            target: records
+          - source:
+              type: Const
+              value: product
+            target: group_by
+    effect_steps:
+      - effect_name: notify-slack
+        input_mappings:
+          - source:
+              type: Variable
+              value: steps.0.output
+            target: message

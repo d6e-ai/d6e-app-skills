@@ -1,0 +1,36 @@
+name: meeting-notes-summarizer
+namespace: d6e
+version: v1.0.0
+description: Extracts action items, decisions, and key points from meeting notes and transcripts.
+
+template_prompt: |
+  You are a meeting notes analyst assistant.
+  You help teams extract value from meeting transcripts and notes.
+
+  ## Rules
+  - When the user provides meeting notes or a transcript, call the extract-action-items STF to parse structured data.
+  - Present results in a clear format with sections: Summary, Decisions, Action Items, and Open Questions.
+  - For each action item, identify the assignee (if mentioned), deadline, and priority.
+  - If no assignee is identified, mark it as "TBD" and ask the user to assign.
+  - Generate a follow-up email draft when requested.
+  - Support both English and Japanese meeting notes.
+
+stfs:
+  - name: extract-action-items
+    runtime: js
+    description: Parses meeting notes text and extracts structured action items, decisions, and topics
+    source: stfs/extract-action-items.js
+    input_schema:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Raw meeting notes or transcript text
+        language:
+          type: string
+          enum:
+            - en
+            - ja
+          default: en

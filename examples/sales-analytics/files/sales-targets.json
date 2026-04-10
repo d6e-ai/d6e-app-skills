@@ -1,0 +1,23 @@
+{
+  "fiscal_year": "2026",
+  "currency": "JPY",
+  "monthly_targets": [
+    { "month": "2026-01", "revenue": 5000000, "deals": 20 },
+    { "month": "2026-02", "revenue": 5500000, "deals": 22 },
+    { "month": "2026-03", "revenue": 7000000, "deals": 28 },
+    { "month": "2026-04", "revenue": 6000000, "deals": 24 },
+    { "month": "2026-05", "revenue": 5500000, "deals": 22 },
+    { "month": "2026-06", "revenue": 6500000, "deals": 26 },
+    { "month": "2026-07", "revenue": 5000000, "deals": 20 },
+    { "month": "2026-08", "revenue": 4500000, "deals": 18 },
+    { "month": "2026-09", "revenue": 6000000, "deals": 24 },
+    { "month": "2026-10", "revenue": 6500000, "deals": 26 },
+    { "month": "2026-11", "revenue": 7000000, "deals": 28 },
+    { "month": "2026-12", "revenue": 8000000, "deals": 32 }
+  ],
+  "product_targets": [
+    { "product": "Enterprise Plan", "annual_revenue": 40000000 },
+    { "product": "Business Plan", "annual_revenue": 25000000 },
+    { "product": "Starter Plan", "annual_revenue": 8000000 }
+  ]
+}
