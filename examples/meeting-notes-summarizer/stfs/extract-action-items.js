@@ -7,7 +7,16 @@ export default function (input) {
   const language = input.language || 'en';
 
   if (!text.trim()) {
-    return { action_items: [], decisions: [], participants: [], word_count: 0 };
+    return {
+      action_items: [],
+      action_count: 0,
+      decisions: [],
+      decision_count: 0,
+      participants: [],
+      word_count: 0,
+      line_count: 0,
+      unassigned_count: 0
+    };
   }
 
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
