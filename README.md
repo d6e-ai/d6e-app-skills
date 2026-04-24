@@ -98,7 +98,8 @@ npx ajv-cli validate -s schema/template.schema.json -d template.yaml
 ## Related Resources / 関連リソース
 
 - [d6e Platform](https://github.com/d6e-ai/d6e) — Main d6e repository / d6e メインリポジトリ
-- [d6e App Marketplace](https://github.com/d6e-ai/d6e-app-marketplace) — App catalog and registry / アプリカタログとレジストリ
+- [d6e App Marketplace](https://github.com/d6e-ai/d6e-app-marketplace) — App catalog website / アプリカタログサイト
+- [d6e App Registry](https://github.com/d6e-ai/d6e-app-registry) — Registry YAMLs and discovery pipeline / レジストリ YAML と自動検出パイプライン
 - [d6e Docker STF Skills](https://github.com/d6e-ai/d6e-docker-stf-skills) — Skills for Docker STF development / Docker STF 開発スキル
 - [skills.sh](https://skills.sh) — The Open Agent Skills Ecosystem / オープンAgent Skillsエコシステム
 

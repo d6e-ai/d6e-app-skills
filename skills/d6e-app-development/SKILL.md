@@ -340,7 +340,7 @@ Follow the directory structure above. The repository root must contain `template
 
 Go to your repository's Settings → Topics and add **`d6e-app`**.
 
-That's it. A scheduled GitHub Action on the marketplace scans for all repositories with this topic every 6 hours, validates the `template.yaml`, and auto-registers the app as **unverified**.
+That's it. A scheduled GitHub Action on [d6e-ai/d6e-app-registry](https://github.com/d6e-ai/d6e-app-registry) scans for all repositories with this topic every 6 hours, validates the `template.yaml`, and auto-registers the app as **unverified**.
 
 ### Step 3 (optional): Tag a release
 
@@ -356,7 +356,7 @@ The discovery script reads `template.yaml` from your default branch. Tagging hel
 To get a green "Verified" badge:
 
 1. Ensure your app is already discovered (has the `d6e-app` topic and valid `template.yaml`)
-2. Submit a PR to [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) adding your app to `verified-apps.yaml`:
+2. Submit a PR to [d6e-ai/d6e-app-registry](https://github.com/d6e-ai/d6e-app-registry) adding your app to `verified-apps.yaml`:
    ```yaml
    apps:
      - namespace: your-org
@@ -370,7 +370,7 @@ Remove the `d6e-app` topic from your repository. The next discovery run will rem
 
 ### How d6e Instances Find Your App
 
-1. Each d6e instance fetches `registry/index.yaml` from the marketplace repo (GitHub raw)
+1. Each d6e instance fetches `registry/index.yaml` via the marketplace HTTP API (`https://marketplace.d6e.ai/api/registry`), which proxies the canonical YAMLs stored in [d6e-ai/d6e-app-registry](https://github.com/d6e-ai/d6e-app-registry)
 2. The Browse tab on the Apps page displays all entries
 3. When a user clicks Install, d6e fetches the `manifestUrl` (auto-derived from your repo URL + version) → gets `template.yaml` → creates resources via Rust API
 
