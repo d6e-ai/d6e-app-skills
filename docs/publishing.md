@@ -23,7 +23,7 @@ your-org/d6e-app-your-app/
 
 Go to your GitHub repository → About (gear icon) → Topics → add **`d6e-app`**.
 
-That's it! A scheduled GitHub Action on the marketplace repository scans for all repos with this topic every 6 hours and auto-registers valid apps as **unverified**.
+That's it! A scheduled GitHub Action on the [d6e-ai/d6e-app-registry](https://github.com/d6e-ai/d6e-app-registry) repository scans for all repos with this topic every 6 hours and auto-registers valid apps as **unverified**.
 
 ## Step 3 (optional): Tag a Release
 
@@ -36,7 +36,7 @@ The discovery script reads `template.yaml` from your default branch. Tagging hel
 
 ## How Discovery Works
 
-1. GitHub Action runs on [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) every 6 hours
+1. GitHub Action runs on [d6e-ai/d6e-app-registry](https://github.com/d6e-ai/d6e-app-registry) every 6 hours
 2. Searches GitHub for repositories with topic `d6e-app`
 3. Fetches `template.yaml` from each repo's default branch
 4. Validates the schema (name, namespace, version, description are required)
@@ -53,7 +53,7 @@ The discovery script reads `template.yaml` from your default branch. Tagging hel
 ## Requesting Verified Status
 
 1. Ensure your app is already discovered
-2. Submit a PR to [d6e-ai/d6e-app-marketplace](https://github.com/d6e-ai/d6e-app-marketplace) adding your app to `verified-apps.yaml`:
+2. Submit a PR to [d6e-ai/d6e-app-registry](https://github.com/d6e-ai/d6e-app-registry) adding your app to `verified-apps.yaml`:
    ```yaml
    apps:
      - namespace: your-org
