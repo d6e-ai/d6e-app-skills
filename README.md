@@ -1,6 +1,6 @@
 # d6e App Skills
 
-[![Skills](https://img.shields.io/badge/skills.sh-d6e--app--skills-blue)](https://skills.sh)
+[![Skills](https://img.shields.io/badge/skills.sh-d6e--app--skills-blue)](https://skills.sh/d6e-ai/d6e-app-skills/d6e-app-development)
 [![GitHub](https://img.shields.io/github/stars/d6e-ai/d6e-app-skills?style=social)](https://github.com/d6e-ai/d6e-app-skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
