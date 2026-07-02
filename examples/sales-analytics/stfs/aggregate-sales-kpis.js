@@ -1,69 +1,10 @@
 // Aggregates raw sales records into KPIs grouped by period, product, or rep.
 // Computes: total revenue, transaction count, average deal size, and top items.
-
-export default function (input) {
-  const records = input.records || [];
-  const groupBy = input.group_by || 'month';
-
-  if (records.length === 0) {
-    return { groups: [], totals: { revenue: 0, transaction_count: 0, avg_deal_size: 0 }, group_by: groupBy, record_count: 0 };
-  }
-
-  const groups = {};
-
-  for (const record of records) {
-    const key = getGroupKey(record, groupBy);
-    if (!groups[key]) {
-      groups[key] = { key, revenue: 0, count: 0, products: {}, reps: {} };
-    }
-
-    const amount = Number(record.amount) || 0;
-    groups[key].revenue += amount;
-    groups[key].count += 1;
-
-    if (record.product) {
-      groups[key].products[record.product] = (groups[key].products[record.product] || 0) + amount;
-    }
-    if (record.rep) {
-      groups[key].reps[record.rep] = (groups[key].reps[record.rep] || 0) + amount;
-    }
-  }
-
-  let totalRevenue = 0;
-  let totalCount = 0;
-
-  const result = Object.values(groups)
-    .map((g) => {
-      totalRevenue += g.revenue;
-      totalCount += g.count;
-
-      const topProduct = Object.entries(g.products)
-        .sort((a, b) => b[1] - a[1])[0];
-      const topRep = Object.entries(g.reps)
-        .sort((a, b) => b[1] - a[1])[0];
-
-      return {
-        group: g.key,
-        revenue: Math.round(g.revenue),
-        transaction_count: g.count,
-        avg_deal_size: Math.round(g.revenue / g.count),
-        top_product: topProduct ? { name: topProduct[0], revenue: Math.round(topProduct[1]) } : null,
-        top_rep: topRep ? { name: topRep[0], revenue: Math.round(topRep[1]) } : null
-      };
-    })
-    .sort((a, b) => a.group.localeCompare(b.group));
-
-  return {
-    groups: result,
-    totals: {
-      revenue: Math.round(totalRevenue),
-      transaction_count: totalCount,
-      avg_deal_size: totalCount > 0 ? Math.round(totalRevenue / totalCount) : 0
-    },
-    group_by: groupBy,
-    record_count: records.length
-  };
-}
+// Also emits a human-readable "summary" string used by the notify-slack effect.
+//
+// d6e STF code style: top-level code (no function wrapper, no export).
+// The runtime binds the step input to the global $input and wraps this
+// file in an async IIFE, so a top-level `return` ends the STF.
 
 function getGroupKey(record, groupBy) {
   switch (groupBy) {
@@ -85,3 +26,80 @@ function getGroupKey(record, groupBy) {
       return 'all';
   }
 }
+
+const records = $input.records || [];
+const groupBy = $input.group_by || 'month';
+
+if (records.length === 0) {
+  return {
+    groups: [],
+    totals: { revenue: 0, transaction_count: 0, avg_deal_size: 0 },
+    group_by: groupBy,
+    record_count: 0,
+    summary: 'Sales summary: no records for this period.'
+  };
+}
+
+const groups = {};
+
+for (const record of records) {
+  const key = getGroupKey(record, groupBy);
+  if (!groups[key]) {
+    groups[key] = { key, revenue: 0, count: 0, products: {}, reps: {} };
+  }
+
+  const amount = Number(record.amount) || 0;
+  groups[key].revenue += amount;
+  groups[key].count += 1;
+
+  if (record.product) {
+    groups[key].products[record.product] = (groups[key].products[record.product] || 0) + amount;
+  }
+  if (record.rep) {
+    groups[key].reps[record.rep] = (groups[key].reps[record.rep] || 0) + amount;
+  }
+}
+
+let totalRevenue = 0;
+let totalCount = 0;
+
+const result = Object.values(groups)
+  .map((g) => {
+    totalRevenue += g.revenue;
+    totalCount += g.count;
+
+    const topProduct = Object.entries(g.products)
+      .sort((a, b) => b[1] - a[1])[0];
+    const topRep = Object.entries(g.reps)
+      .sort((a, b) => b[1] - a[1])[0];
+
+    return {
+      group: g.key,
+      revenue: Math.round(g.revenue),
+      transaction_count: g.count,
+      avg_deal_size: Math.round(g.revenue / g.count),
+      top_product: topProduct ? { name: topProduct[0], revenue: Math.round(topProduct[1]) } : null,
+      top_rep: topRep ? { name: topRep[0], revenue: Math.round(topRep[1]) } : null
+    };
+  })
+  .sort((a, b) => a.group.localeCompare(b.group));
+
+const totals = {
+  revenue: Math.round(totalRevenue),
+  transaction_count: totalCount,
+  avg_deal_size: totalCount > 0 ? Math.round(totalRevenue / totalCount) : 0
+};
+
+// Human-readable one-liner consumed by the notify-slack effect
+// ($steps[0].summary in the workflow's effect step mapping).
+const summary =
+  `Sales summary (by ${groupBy}): revenue ${totals.revenue}, ` +
+  `${totals.transaction_count} transactions, avg deal size ${totals.avg_deal_size}.`;
+
+return {
+  groups: result,
+  totals,
+  group_by: groupBy,
+  record_count: records.length,
+  summary
+};

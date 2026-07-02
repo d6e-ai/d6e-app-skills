@@ -74,8 +74,12 @@
         "description": { "type": "string", "description": "What this STF does" },
         "source": { "type": "string", "description": "Relative path to source file (for js/wasm, read and base64-encoded by installer)" },
         "image": { "type": "string", "description": "Docker image reference (for docker runtime)" },
-        "command": { "type": "string", "description": "Docker command override" },
-        "env": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Environment variables (docker only)" },
+        "command": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Docker command override as an array of strings (e.g., [\"python3\", \"main.py\"])"
+        },
+        "env": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Environment variables (docker only). Each key becomes an install-dialog input; admin-entered values are stored as encrypted secrets" },
         "input_schema": { "type": "object", "description": "JSON Schema for input validation" },
         "output_schema": { "type": "object", "description": "JSON Schema for output validation" }
       },
@@ -96,15 +100,16 @@
     },
     "effect": {
       "type": "object",
-      "required": ["name", "description", "version", "url", "method", "header_mappings", "body_mappings"],
+      "required": ["name", "description", "url", "method", "header_mappings", "body_mappings"],
       "properties": {
         "name": { "type": "string", "description": "Effect identifier (referenced in workflow effect_name)" },
         "description": { "type": "string", "description": "What this effect does" },
-        "version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$", "description": "Semver version" },
-        "url": { "type": "string", "format": "uri", "description": "Target URL" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Optional semver version WITHOUT the v prefix (e.g., 1.0.0). Defaults to the app version" },
+        "url": { "type": "string", "description": "Target URL" },
         "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"], "description": "HTTP method" },
-        "header_mappings": { "type": "object", "description": "Header key-value mappings" },
-        "body_mappings": { "type": "object", "description": "Body field mappings" },
+        "header_mappings": { "type": "object", "description": "Header mappings ($.path = variable resolved against the effect step input; other strings are constants)" },
+        "body_mappings": { "type": "object", "description": "JSON body field mappings ($.path = variable; other values are constants)" },
+        "query_mappings": { "type": "object", "description": "URL query parameter mappings ($.path = variable; other values are constants)" },
         "input_schema": { "type": "object", "description": "JSON Schema for input validation" }
       },
       "additionalProperties": false
@@ -137,7 +142,7 @@
       "type": "object",
       "required": ["name", "source"],
       "properties": {
-        "name": { "type": "string", "description": "Step name (referenced as sources.{name} in mappings)" },
+        "name": { "type": "string", "description": "Step name (referenced as $sources.{name} in mappings)" },
         "source": { "$ref": "#/definitions/inputSource" },
         "content_type": { "type": "string", "description": "Expected content type (optional)" }
       },
@@ -149,7 +154,7 @@
       "properties": {
         "type": { "type": "string", "enum": ["Library", "File", "Fetch"], "description": "Input source type" },
         "name": { "type": "string", "description": "Library name (for Library type)" },
-        "id": { "type": "string", "format": "uuid", "description": "File UUID (for File type, resolved at install)" },
+        "id": { "type": "string", "description": "File UUID (for File type) — must reference a file that already exists in the target workspace; the installer does not rewrite it" },
         "url": { "type": "string", "description": "Request URL (for Fetch type)" },
         "method": { "type": "string", "description": "HTTP method (for Fetch type, default: GET)" },
         "headers": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Request headers (for Fetch type)" },
@@ -193,10 +198,10 @@
           "required": ["type", "value"],
           "properties": {
             "type": { "type": "string", "enum": ["Const", "Variable"] },
-            "value": { "description": "Static value (Const) or field path string (Variable)" }
+            "value": { "description": "Static value (Const) or engine variable path string (Variable): $input.field, $sources.{step_name}.field, or $steps[n].field" }
           },
           "additionalProperties": false,
-          "description": "Mapping source: Const (static value) or Variable (field path)"
+          "description": "Mapping source: Const (static value) or Variable (engine variable path)"
         },
         "target": { "type": "string", "description": "Target field name in the step input" }
       },
