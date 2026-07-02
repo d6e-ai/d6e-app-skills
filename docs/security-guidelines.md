@@ -38,6 +38,9 @@ The `template_prompt` field is injected into the AI agent's system context. Mali
 
 ## Review Process
 
-- All marketplace submissions start as `unverified`
+- Marketplace listing happens via merge request to
+  [d6e-app-registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry);
+  the d6e team reviews every submission and assigns the tier
+- Apps enter as `unverified` unless the review grants `verified`
 - The d6e team reviews verified apps for security compliance
 - Report security issues to security@d6e.ai

@@ -1,7 +1,7 @@
 # d6e App Skills
 
 [![Skills](https://img.shields.io/badge/skills.sh-d6e--app--skills-blue)](https://skills.sh/d6e-ai/d6e-app-skills/d6e-app-development)
-[![GitLab](https://img.shields.io/badge/GitLab-d6e--ai%2Fd6e--app--skills-FC6D26?logo=gitlab)](https://gitlab.com/d6e-ai/d6e-app-skills)
+[![GitLab](https://img.shields.io/badge/GitLab-d6e--ai%2Fd6e--app--skills-FC6D26?logo=gitlab)](https://gitlab.com/cauchye/d6e-ai/d6e-app-skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Agent Skills for developing and publishing d6e Apps — reusable workspace configurations for the d6e platform.
@@ -24,7 +24,7 @@ Guides AI agents through creating d6e Apps, including:
 - STF definitions (JS, WASM, Docker runtimes)
 - File, effect, and workflow packaging
 - Prompt separation (template_prompt vs custom_prompt)
-- Publishing to the d6e App Marketplace
+- Distribution: manual install (Install from URL) and marketplace listing via d6e-app-registry
 - Security best practices
 
 AIエージェントによる d6e アプリ作成をガイドします:
@@ -33,13 +33,13 @@ AIエージェントによる d6e アプリ作成をガイドします:
 - STF定義（JS、WASM、Docker ランタイム）
 - ファイル、エフェクト、ワークフローのパッケージング
 - プロンプトの分離（template_prompt vs custom_prompt）
-- d6e App Marketplace への公開
+- 配布: 手動インストール（Install from URL）と d6e-app-registry 経由のマーケットプレイス掲載
 - セキュリティのベストプラクティス
 
 ## Installation / インストール
 
 ```bash
-npx skills add https://gitlab.com/d6e-ai/d6e-app-skills --skill d6e-app-development
+npx skills add https://gitlab.com/cauchye/d6e-ai/d6e-app-skills --skill d6e-app-development
 ```
 
 > This repository is hosted on GitLab, so the full URL is required — the GitHub-style `owner/repo` shorthand does not work.
@@ -54,7 +54,7 @@ After installation, type `@skills` in Cursor Composer to verify `d6e-app-develop
 
 - **[template.yaml Specification](./docs/template-yaml-spec.md)** — Full field reference / 全フィールドリファレンス
 - **[Security Guidelines](./docs/security-guidelines.md)** — Security best practices for app authors / セキュリティガイドライン
-- **[Publishing Guide](./docs/publishing.md)** — How to publish to the marketplace / マーケットプレイスへの公開方法
+- **[Publishing Guide](./docs/publishing.md)** — Manual install (recommended for development) and marketplace listing via d6e-app-registry / 手動インストール（開発時推奨）と d6e-app-registry 経由のマーケットプレイス掲載
 
 ## Examples / サンプル
 
@@ -101,10 +101,10 @@ npx ajv-cli validate -s schema/template.schema.json -d template.yaml
 
 ## Related Resources / 関連リソース
 
-- [d6e Platform](https://github.com/d6e-ai/d6e) — Main d6e repository / d6e メインリポジトリ
-- [d6e App Marketplace](https://github.com/d6e-ai/d6e-app-marketplace) — App catalog website / アプリカタログサイト
-- [d6e App Registry](https://gitlab.com/d6e-ai/d6e-app-registry) — Registry YAMLs and discovery pipeline / レジストリ YAML と自動検出パイプライン
-- [d6e Docker STF Skills](https://gitlab.com/d6e-ai/d6e-docker-stf-skills) — Skills for Docker STF development / Docker STF 開発スキル
+- [d6e Platform](https://gitlab.com/cauchye/d6e-ai/d6e) — Main d6e repository / d6e メインリポジトリ
+- [d6e App Marketplace](https://gitlab.com/cauchye/d6e-ai/d6e-app-marketplace) — App catalog website / アプリカタログサイト
+- [d6e App Registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry) — Marketplace listing data; submit an MR here to get listed / マーケットプレイス掲載データ（掲載はここへのMRで申請）
+- [d6e Docker STF Skills](https://gitlab.com/cauchye/d6e-ai/d6e-docker-stf-skills) — Skills for Docker STF development / Docker STF 開発スキル
 - [skills.sh](https://skills.sh) — The Open Agent Skills Ecosystem / オープンAgent Skillsエコシステム
 
 ## Contributing / コントリビューション
