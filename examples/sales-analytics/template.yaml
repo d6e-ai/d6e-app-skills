@@ -60,13 +60,15 @@ files:
 effects:
   - name: notify-slack
     description: Posts a sales summary message to a Slack channel
-    version: v1.0.0
+    # version omitted — defaults to the app version
     url: https://hooks.slack.com/services/PLACEHOLDER
     method: POST
     header_mappings:
-      Content-Type: application/json
+      Content-Type: application/json # no "$." prefix → constant
     body_mappings:
-      text: "$.input.message"
+      # "$." prefix → variable, resolved against this effect step's
+      # resolved input (the "message" field mapped below)
+      text: "$.message"
 
 workflows:
   - name: daily-sales-summary
@@ -75,14 +77,17 @@ workflows:
       - name: sales-data
         source:
           type: Fetch
+          # Expected to return JSON like {"records": [{"date": ..., "amount": ...}, ...]}
           url: https://api.example.com/sales/today
           method: GET
     stf_steps:
       - stf_name: aggregate-sales-kpis
         input_mappings:
+          # $sources.{step_name} = the input step's resolved value
+          # (for Fetch: the parsed JSON response body)
           - source:
               type: Variable
-              value: sources.sales-data
+              value: $sources.sales-data.records
             target: records
           - source:
               type: Const
@@ -91,7 +96,8 @@ workflows:
     effect_steps:
       - effect_name: notify-slack
         input_mappings:
+          # $steps[0] = output of the first STF step (0-based)
           - source:
               type: Variable
-              value: steps.0.output
+              value: $steps[0].summary
             target: message
