@@ -46,6 +46,29 @@ Plugin を開発・テストする方法を説明します。最後の仕上げ�
 中央サイト [https://www.d6e.ai](https://www.d6e.ai/ja-JP) で行います —
 これ以外の URL はありません。
 
+## 本ガイドの範囲: Plugin であって、カスタムフロントエンドではない
+
+d6e は同じ API 境界線の両側から拡張できますが、本ガイドが扱うのは
+前者のみです。
+
+- **Plugin** は*ワークスペースの中身* — `template_prompt`、テーブル/
+  ポリシー、STF、ワークフロー、Effect — を `template.yaml` に
+  パッケージ化したもので、インスタンスの**中に**インストールされ、
+  インスタンス**によって**実行されます。ユーザーは組み込みの d6e
+  コンソールとチャットを通じて利用します。本ドキュメントの残りが
+  開発・テストするのはこれです。
+- **カスタムフロントエンド**は独立してデプロイされる Web アプリ
+  （独自ドメイン・独自ホスティング）で、
+  [https://www.d6e.ai](https://www.d6e.ai/ja-JP) でユーザーを
+  ログインさせ、インスタンスの公開 API — 以下で使うものと同じ API —
+  を通じてワークスペースを操作します。d6e にインストールされるものでは
+  なく、通常は Plugin が用意したものを*消費*する側です。
+
+後者を作る場合、あるいはフロントエンド・インスタンス・中央アカウント
+サイトの関係が曖昧な場合は、まず d6e-custom-frontend-skills リポジトリの
+[カスタムフロントエンドと d6e インスタンスの関係](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.ja.md)
+を読んでから、ワークスペース側の作業のために本ガイドへ戻ってきてください。
+
 ---
 
 ## 1. API キーの取得（初回のみ、約 1 分）
@@ -437,6 +460,8 @@ MCP: `d6e_execute_workflow`。実験中の作成・更新は `d6e_create_workflo
 プラグインには専用フロントエンド（インスタンスの API を呼ぶ独自の
 Web アプリ）を付けられます。認証・セッション・プロキシのパターンは
 [d6e-custom-frontend-skills](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills)
+を、フロントエンド・インスタンス・中央アカウントサイトの関係の全体像は
+[frontend-and-instance.ja.md](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.ja.md)
 を参照してください。この場合、公開までに次のステップが追加されます:
 
 5. 稼働中のインスタンスに向けてフロントエンドを実装します。開発中は
