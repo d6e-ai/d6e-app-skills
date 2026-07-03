@@ -218,6 +218,15 @@ Repeated reads of an unchanged Drive file hit the cache. Text extraction
 (`d6e_extract_file_text`) and image viewing (`d6e_view_image`) accept the
 resulting storage file ID.
 
+Everything in this section works over MCP as well as REST: exploring is
+`d6e_sql` on `drive_files`, reading is `d6e_read_drive_file`, and files
+*outside* the synced roots can be fetched with
+`d6e_download_external_file` / `d6e_call_external_api`. The one
+exception is the initial Drive-sync **configuration** above
+(`drive-sync/config` / `roots`): it has no MCP tool — like connecting
+the SaaS credential itself, it is a one-time operator step done in the
+console (or via REST).
+
 ---
 
 ## 5. SaaS APIs (freee, Google Workspace, …) without holding tokens
