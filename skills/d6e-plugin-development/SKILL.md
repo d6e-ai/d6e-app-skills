@@ -495,15 +495,80 @@ Then verify in the workspace: the STFs/workflows appear with
 `{namespace}/{plugin}/` name prefixes, and `d6e_execute_workflow` /
 `d6e_instant_run_stf` can exercise them.
 
-**Developing from a local AI harness (Codex / Claude Code / Cursor):**
-you can iterate against the live instance long before packaging —
-connect the harness to the instance's MCP server (or call `/api/v1/*`
-with an API key) to run SQL, read synced Drive files, call SaaS APIs
-through the server-held credentials, and instant-run JS STF drafts in
-the real QuickJS runtime. See
-[`docs/local-ai-development.md`](../../docs/local-ai-development.md)
-for the full setup (auth, MCP config per harness, and what differs from
-the hosted d6e chat agent).
+## Developing from a Local AI Harness (Codex / Claude Code / Cursor)
+
+You can iterate against the live instance long before packaging —
+everything the d6e chat agent can do is exposed as public HTTP APIs on
+the instance, so a local harness gets tool-for-tool parity.
+
+**1. Get an API key** (long-lived `d6e_...` Bearer token, carries your
+user identity and workspace memberships): console → avatar in the
+header → **API Keys** (`/{locale}/user/api-keys`). On instances
+older than v0.21.x without that page, mint one via the API using the
+`auth-token` cookie from a logged-in console session:
+
+```bash
+curl -s -X POST ${D6E_BASE_URL}/api/v1/api-keys \
+  -H "Authorization: Bearer ${JWT_FROM_COOKIE}" \
+  -H 'Content-Type: application/json' -d '{"name":"local-dev"}'
+# -> { "key": "d6e_..." }  ← shown once
+```
+
+**2. Connect the harness to the instance's MCP server** (HTTP mode,
+default port 8081, path `/mcp` — the same ~90 `d6e_*` tools the d6e
+chat agent uses):
+
+```jsonc
+// Cursor .cursor/mcp.json
+{ "mcpServers": { "d6e": {
+    "url": "http://<instance-host>:8081/mcp",
+    "headers": { "Authorization": "Bearer d6e_YOUR_KEY" } } } }
+```
+
+```toml
+# Codex CLI ~/.codex/config.toml
+[mcp_servers.d6e]
+url = "http://<instance-host>:8081/mcp"
+bearer_token_env_var = "D6E_API_KEY"
+```
+
+```bash
+# Claude Code
+claude mcp add --transport http d6e http://<instance-host>:8081/mcp \
+  --header "Authorization: Bearer d6e_YOUR_KEY"
+```
+
+Start with `d6e_list_workspaces` + `d6e_set_workspace`. Everything is
+also callable as plain REST (`Authorization: Bearer d6e_...` +
+`X-Workspace-ID` headers) if you prefer curl over MCP.
+
+**3. What runs where while iterating:**
+
+- **Workspace SQL** — remote, real DB: `d6e_sql` /
+  `POST /api/v1/workspaces/{id}/sql`. Table access is deny-by-default;
+  `POLICY_DENIED` means the workspace needs an allow policy (console →
+  Admin → Policies, or `policies:` in template.yaml).
+- **JS STFs** — do NOT emulate QuickJS locally; use
+  `d6e_instant_run_stf` / `POST /api/v1/stfs/instant-run` with
+  base64-encoded code to run drafts in the real runtime against real
+  data (script style, `$input`, top-level `return` — see JS STF Code
+  Style above).
+- **Docker STFs** — the only locally-run piece: `docker build` + pipe
+  the input JSON to `docker run -i`. Point `api_url`/`api_token` at the
+  live instance for integration tests.
+- **Drive files** — `SELECT path, drive_id FROM drive_files ...` (SQL
+  projection kept in sync by the instance), then `d6e_read_drive_file`
+  for content. Requires Drive sync enabled (Files page → Drive tab) and
+  a SELECT policy on `drive_files`.
+- **SaaS APIs (freee, Google Workspace, ...)** — `d6e_call_external_api`
+  / `POST /api/v1/saas-proxy`; credentials stay server-side, connected
+  once in console → Admin → SaaS integrations.
+
+Full guide (loopback OAuth login without the console, per-harness
+config, runtime environment details, behaviour parity with the d6e
+chat agent):
+[docs/local-ai-development.md](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills/-/blob/main/docs/local-ai-development.md)
+([日本語版](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills/-/blob/main/docs/local-ai-development.ja.md)).
 
 ## Distributing Your Plugin
 

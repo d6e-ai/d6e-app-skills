@@ -1,5 +1,7 @@
 # Developing d6e Plugins with a Local AI Harness
 
+日本語版: [local-ai-development.ja.md](./local-ai-development.ja.md)
+
 This guide explains how to develop and test d6e Plugins from a **local AI
 coding harness** — Codex CLI, Claude Code, Cursor, or any agent that can
 run shell commands and/or connect to MCP servers — against a **live d6e
@@ -93,6 +95,12 @@ relay (d6e ≥ v0.20.1). No allow-list registration is needed.
    ```
 
 ### 1-b. Mint a long-lived API key
+
+On instances running d6e > v0.21.0 you can skip the curl below: open the
+console, click your avatar in the header, choose **API Keys**
+(`/{locale}/user/api-keys`), and create the key in the UI (steps 1-a
+above are then unnecessary too — the console login already is the
+OAuth2 flow). On older instances, mint it via the API:
 
 ```bash
 curl -s -X POST ${D6E_BASE_URL}/api/v1/api-keys \
