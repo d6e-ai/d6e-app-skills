@@ -495,26 +495,19 @@ Then verify in the workspace: the STFs/workflows appear with
 `{namespace}/{plugin}/` name prefixes, and `d6e_execute_workflow` /
 `d6e_instant_run_stf` can exercise them.
 
-## Developing from a Local AI Harness (Codex / Claude Code / Cursor)
+## Developing from a Local AI Agent (Codex / Claude Code / Cursor)
 
 You can iterate against the live instance long before packaging —
 everything the d6e chat agent can do is exposed as public HTTP APIs on
-the instance, so a local harness gets tool-for-tool parity.
+the instance, so a local AI coding agent gets tool-for-tool parity.
 
 **1. Get an API key** (long-lived `d6e_...` Bearer token, carries your
 user identity and workspace memberships): console → avatar in the
-header → **API Keys** (`/{locale}/user/api-keys`). On instances
-older than v0.21.x without that page, mint one via the API using the
-`auth-token` cookie from a logged-in console session:
+header → **API Keys** (`/{locale}/user/api-keys`; also linked from the
+workspace settings page's Integration section). The key is shown once —
+copy and store it.
 
-```bash
-curl -s -X POST ${D6E_BASE_URL}/api/v1/api-keys \
-  -H "Authorization: Bearer ${JWT_FROM_COOKIE}" \
-  -H 'Content-Type: application/json' -d '{"name":"local-dev"}'
-# -> { "key": "d6e_..." }  ← shown once
-```
-
-**2. Connect the harness to the instance's MCP server** (HTTP mode,
+**2. Connect the agent to the instance's MCP server** (HTTP mode,
 default port 8081, path `/mcp` — the same ~90 `d6e_*` tools the d6e
 chat agent uses):
 
@@ -564,9 +557,10 @@ also callable as plain REST (`Authorization: Bearer d6e_...` +
   / `POST /api/v1/saas-proxy`; credentials stay server-side, connected
   once in console → Admin → SaaS integrations.
 
-Full guide (loopback OAuth login without the console, per-harness
-config, runtime environment details, behaviour parity with the d6e
-chat agent):
+Full guide (per-agent MCP config, runtime environment details,
+behaviour parity with the d6e chat agent, and the release steps for
+plugins with a custom frontend — deployed redirect URI registration and
+instance restart):
 [docs/local-ai-development.md](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills/-/blob/main/docs/local-ai-development.md)
 ([日本語版](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills/-/blob/main/docs/local-ai-development.ja.md)).
 

@@ -1,11 +1,11 @@
-# Developing d6e Plugins with a Local AI Harness
+# Developing d6e Plugins with a Local AI Agent
 
 日本語版: [local-ai-development.ja.md](./local-ai-development.ja.md)
 
-This guide explains how to develop and test d6e Plugins from a **local AI
-coding harness** — Codex CLI, Claude Code, Cursor, or any agent that can
-run shell commands and/or connect to MCP servers — against a **live d6e
-instance**, without deploying anything until the very end.
+This guide explains how to develop and test d6e Plugins from a **local
+AI coding agent** — Codex CLI, Claude Code, Cursor, or any agent that
+can run shell commands and/or connect to MCP servers — against a **live
+d6e instance**, without deploying anything until the very end.
 
 The core fact that makes this work: **everything the d6e AI agent can do
 is exposed as public HTTP APIs on the instance**. The chat agent inside
@@ -14,7 +14,7 @@ from your laptop. There is no capability that exists only "inside" d6e.
 
 ```
 ┌────────────────────┐        ┌────────────────────────────────────┐
-│ Local AI harness    │        │ d6e instance (e.g. https://…)      │
+│ Local AI agent      │        │ d6e instance (e.g. https://…)      │
 │ (Codex / Claude     │  MCP   │  ┌──────────┐   ┌──────────────┐  │
 │  Code / Cursor)     │───────▶│  │ MCP :8081│──▶│ Rust API      │  │
 │                     │  REST  │  └──────────┘   │  /api/v1/*    │  │
@@ -33,7 +33,7 @@ from your laptop. There is no capability that exists only "inside" d6e.
 | Google Drive files | Remote (synced mirror) | `SELECT * FROM drive_files` + `d6e_read_drive_file` |
 | SaaS calls (freee, Google Workspace, …) | Remote (server-held credentials) | `POST /api/v1/saas-proxy` or MCP `d6e_call_external_api` |
 | Workflows | Remote | `POST /api/v1/workflows/{id}/execute` or MCP `d6e_execute_workflow` |
-| Template prompt behaviour | Local harness ≈ d6e chat | see [Behaviour parity](#behaviour-parity-with-the-d6e-chat-agent) |
+| Template prompt behaviour | Local agent ≈ d6e chat | see [Behaviour parity](#behaviour-parity-with-the-d6e-chat-agent) |
 
 Placeholders used throughout:
 
@@ -43,75 +43,22 @@ Placeholders used throughout:
 
 ---
 
-## 1. Get credentials (one-time, ~2 minutes)
+## 1. Get an API key (one-time, ~1 minute)
 
-All `/api/v1/*` endpoints accept `Authorization: Bearer <token>` where
-the token is either a **short-lived JWT** (from OAuth2 login) or a
-**long-lived API key** (`d6e_…`). For harness work you want an API key;
-the JWT is only needed once to create it.
+All `/api/v1/*` endpoints accept `Authorization: Bearer <token>`. For
+local development you want a long-lived **API key** (`d6e_…`), created
+in the d6e console:
 
-### 1-a. Get a JWT via OAuth2 (loopback redirect)
+1. Log in to the console (`${D6E_BASE_URL}`).
+2. Click your avatar in the header → **API Keys**
+   (`/{locale}/user/api-keys`). The same page is linked from the
+   workspace settings page's Integration section, next to the client ID
+   and workspace ID.
+3. Create a key and copy the `d6e_…` value — it is shown only once.
+   The expiry date is optional; omit it for a non-expiring key.
 
-Loopback redirect URIs — `localhost`, `127.0.0.0/8`, `[::1]`, **any port,
-any path** — are always accepted by d6e-auth and by the instance's token
-relay (d6e ≥ v0.20.1). No allow-list registration is needed.
-
-1. Get the instance's OAuth client ID (`d6e_…` — not to be confused with
-   an API key). It is shown in the **Integration** section of the
-   workspace settings page (`/{locale}/workspaces/{id}/settings`,
-   workspace admin role required), or ask the instance operator
-   (`D6E_AUTH_CLIENT_ID` in the instance's `.env`).
-
-2. Open this URL in a browser (any `state` value works for a manual run):
-
-   ```
-   ${D6E_AUTH_URL}/auth/login?client_id=${CLIENT_ID}&redirect_uri=http://localhost:8976/cb&state=manual&response_type=code
-   ```
-
-3. Catch the redirect. Simplest: run a one-shot listener before logging in —
-
-   ```bash
-   python3 -c "
-   from http.server import BaseHTTPRequestHandler, HTTPServer
-   class H(BaseHTTPRequestHandler):
-       def do_GET(self):
-           print(self.path)  # /cb?code=...&state=manual
-           self.send_response(200); self.end_headers()
-           self.wfile.write(b'code received - close this tab')
-   HTTPServer(('127.0.0.1', 8976), H).handle_request()"
-   ```
-
-   (If you skip the listener, the browser shows a connection error but
-   the `code=` is still visible in the address bar — copy it from there.)
-
-4. Exchange the code **at the instance** (not at d6e-auth — the instance
-   injects its own client credentials, so you never need a client secret):
-
-   ```bash
-   curl -s ${D6E_BASE_URL}/api/v1/auth/token \
-     -H 'Content-Type: application/json' \
-     -d '{"grant_type":"authorization_code","code":"<CODE>","redirect_uri":"http://localhost:8976/cb"}'
-   # -> { "access_token": "...", "refresh_token": "...", ... }
-   ```
-
-### 1-b. Mint a long-lived API key
-
-On instances running d6e > v0.21.0 you can skip the curl below: open the
-console, click your avatar in the header, choose **API Keys**
-(`/{locale}/user/api-keys`), and create the key in the UI (steps 1-a
-above are then unnecessary too — the console login already is the
-OAuth2 flow). On older instances, mint it via the API:
-
-```bash
-curl -s -X POST ${D6E_BASE_URL}/api/v1/api-keys \
-  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"codex-local-dev"}'
-# -> { "key": "d6e_0198...", ... }   ← shown once; store it
-```
-
-`expires_at` (ISO 8601) is optional; omit it for a non-expiring key. The
-key inherits your user identity and workspace memberships. Use it as
+API keys belong to your user account (not to a workspace) and inherit
+your workspace memberships. Use the key as
 `Authorization: Bearer d6e_…` everywhere below, plus
 `X-Workspace-ID: ${WORKSPACE_ID}` on workspace-scoped endpoints.
 
@@ -123,14 +70,15 @@ curl -s ${D6E_BASE_URL}/api/v1/workspaces -H "Authorization: Bearer ${D6E_API_KE
 
 ---
 
-## 2. Connect your harness to the instance MCP server (recommended)
+## 2. Connect your agent to the instance MCP server (recommended)
 
 The instance runs the d6e MCP server in HTTP mode (default port **8081**,
 path `/mcp`). This is *the same server, with the same ~90 `d6e_*` tools,
-that the d6e chat agent uses* — connecting your harness to it gives you
-tool-for-tool parity with the hosted agent: `d6e_sql`, `d6e_list_files`,
-`d6e_search_files`, `d6e_read_drive_file`, `d6e_call_external_api`,
-`d6e_instant_run_stf`, `d6e_execute_workflow`, `d6e_create_stf`, and so on.
+that the d6e chat agent uses* — connecting your local agent to it gives
+you tool-for-tool parity with the hosted agent: `d6e_sql`,
+`d6e_list_files`, `d6e_search_files`, `d6e_read_drive_file`,
+`d6e_call_external_api`, `d6e_instant_run_stf`, `d6e_execute_workflow`,
+`d6e_create_stf`, and so on.
 
 > Note: on current deployments port 8081 is plain HTTP (the reverse proxy
 > only fronts the console and `/api/v1`). Treat the API key accordingly,
@@ -172,7 +120,7 @@ After connecting, the agent should call `d6e_list_workspaces` once, then
 workspace-scoped tools.
 
 If you prefer not to use MCP, everything below shows the raw REST
-equivalent — `curl` from the harness works just as well.
+equivalent — `curl` works just as well.
 
 ---
 
@@ -251,8 +199,8 @@ resulting storage file ID.
 SaaS credentials (OAuth connections to freee, Google Workspace, Chatwork,
 Notion, GitHub, Salesforce, Box, Money Forward, Zendesk) are configured
 **once, in the d6e console** by a workspace member, and stored encrypted
-server-side. Your harness never sees the tokens — it calls the proxy and
-the instance injects auth and handles refresh:
+server-side. Your local agent never sees the tokens — it calls the proxy
+and the instance injects auth and handles refresh:
 
 ```bash
 # freee: list companies (MCP: d6e_call_external_api)
@@ -331,9 +279,9 @@ curl -s -X POST ${D6E_BASE_URL}/api/v1/stfs/instant-run \
 MCP equivalent: `d6e_instant_run_stf` (also accepts `stf_id` /
 `stf_version_id` to re-run a saved STF).
 
-The edit-run loop is: edit `my-stf.js` locally in your harness →
-instant-run → read output/error → repeat. Once green, save it with
-`d6e_create_stf` / `POST /api/v1/stfs` or ship it in `template.yaml`.
+The edit-run loop is: edit `my-stf.js` locally → instant-run → read
+output/error → repeat. Once green, save it with `d6e_create_stf` /
+`POST /api/v1/stfs` or ship it in `template.yaml`.
 
 Runtime environment (differences from Node to keep in mind):
 
@@ -396,7 +344,7 @@ echo '{
 ## 8. Workflows
 
 Workflows (input → STF steps → effect steps) always execute on the
-instance. From the harness:
+instance. From your local agent:
 
 ```bash
 # The request body IS the workflow input (no wrapper object)
@@ -415,7 +363,7 @@ final definitions go into `template.yaml`'s `workflows:` section.
 
 ## 9. Behaviour parity with the d6e chat agent
 
-How close is "my harness + instance MCP" to "the d6e chat agent"?
+How close is "my local agent + instance MCP" to "the d6e chat agent"?
 
 **Identical:**
 
@@ -429,13 +377,13 @@ How close is "my harness + instance MCP" to "the d6e chat agent"?
 - **System prompt.** The d6e agent's context is assembled from the
   workspace: installed plugins' `template_prompt` (as
   `## PLUGIN: namespace/name@version` sections), workspace prompt rules,
-  and product instructions. Your harness has its own vendor prompt and
-  your local rules instead.
-- **Model.** d6e chat uses the workspace's configured model; your
-  harness uses its own subscription's model.
+  and product instructions. Your local agent has its own vendor prompt
+  and your local rules instead.
+- **Model.** d6e chat uses the workspace's configured model; your local
+  agent uses its own subscription's model.
 
 To make local experiments representative of the deployed plugin, paste
-the draft `template_prompt` into your harness's project rules
+the draft `template_prompt` into your agent's project rules
 (`AGENTS.md` / `CLAUDE.md` / `.cursor/rules/`) while iterating. Then the
 remaining delta is vendor-prompt flavour, which does not affect tool
 behaviour — only phrasing and planning style.
@@ -446,31 +394,64 @@ prompt text locally, re-test, and only then bake it into `template.yaml`.
 
 ---
 
-## 10. From experiment to Plugin
+## 10. From experiment to published Plugin
 
-Once the pieces work from your harness:
+Once the pieces work from your local agent, the path to release is:
+
+### 10-a. Package and install the plugin
 
 1. Collect resources into a `template.yaml` (see
    [the d6e-plugin-development skill](../skills/d6e-plugin-development/SKILL.md)
    and [template-yaml-spec.md](./template-yaml-spec.md)):
    `template_prompt`, `stfs` (inline JS or Docker image refs), `files`,
    `effects`, `workflows`.
-2. Host it at any raw URL the instance can reach (GitLab raw URL of your
-   plugin repository).
+2. Push the repository — **GitHub or GitLab both work** — with
+   `template.yaml` at the root. Install from URL rewrites web URLs to
+   raw/API URLs automatically, so pasting the repository URL is enough.
+   For a **private repository**, you will also be asked for a personal
+   access token (PAT) with read access when installing.
 3. Install into a test workspace: Console → プラグイン → **Install from
-   URL** — this is the recommended path for development and
-   team-internal plugins.
+   URL** — the recommended path for development and team-internal
+   plugins. Re-run it after each push to update resources in place.
 4. Verify in the d6e chat UI (this is the step that exercises the real
    system prompt assembly).
-5. Optionally publish to the marketplace via merge request to
+
+### 10-b. If the plugin has a custom frontend
+
+A plugin can come with a dedicated frontend (its own web app calling the
+instance's APIs — see
+[d6e-custom-frontend-skills](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills)
+for the auth / session / proxy patterns). That adds these release steps:
+
+5. Build the frontend against the live instance. During development,
+   OAuth2 login with **loopback redirect URIs** (`localhost`,
+   `127.0.0.0/8`, `[::1]` — any port, any path) works without any
+   registration (d6e ≥ v0.20.1).
+6. Deploy the frontend, then register its **deployed** redirect URI
+   (e.g. `https://your-app.example.com/auth/callback`) in **both**
+   places:
+   - **d6e-auth**: self-service for franchise owners/admins at
+     `${D6E_AUTH_URL}/{locale}/account/franchise`
+     (the client's redirect URI list);
+   - **the d6e instance**: add the URI to `ALLOWED_REDIRECT_URIS` in the
+     instance's `.env`.
+7. **Redeploy / restart the d6e instance** so the `.env` change takes
+   effect (e.g. `docker compose up -d` on the instance host) — plan this
+   with the instance operator, since it is the only step that touches
+   the instance itself.
+
+### 10-c. Marketplace listing (optional)
+
+8. Publish to the marketplace via merge request to
    [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry).
 
 ### Checklist
 
-- [ ] API key created and stored (`d6e_…`)
-- [ ] Harness connected to `http://<instance-host>:8081/mcp` (or REST via curl)
-- [ ] SQL / Drive / SaaS calls verified from the harness
+- [ ] API key created in the console and stored (`d6e_…`)
+- [ ] Local agent connected to `http://<instance-host>:8081/mcp` (or REST via curl)
+- [ ] SQL / Drive / SaaS calls verified from the local agent
 - [ ] JS STFs validated with instant-run (not a local Node shim)
 - [ ] Docker STFs validated with local `docker run`, then with `api_url` pointed at the instance
-- [ ] Draft `template_prompt` mirrored into local harness rules during iteration
-- [ ] `template.yaml` installed via Install from URL and re-verified in d6e chat
+- [ ] Draft `template_prompt` mirrored into the local agent's rules during iteration
+- [ ] `template.yaml` installed via Install from URL (PAT entered if the repo is private) and re-verified in d6e chat
+- [ ] (Custom frontend) deployed redirect URI registered on d6e-auth **and** in the instance's `ALLOWED_REDIRECT_URIS`, then the instance restarted

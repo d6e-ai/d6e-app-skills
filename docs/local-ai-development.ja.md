@@ -1,12 +1,12 @@
-# ローカル AI ハーネスで d6e Plugin を開発する
+# ローカル AI エージェントで d6e Plugin を開発する
 
 English version: [local-ai-development.md](./local-ai-development.md)
 
-このガイドは、**ローカルの AI コーディングハーネス**（Codex CLI、Claude
-Code、Cursor など、シェルコマンドの実行や MCP サーバーへの接続ができる
-エージェント）から**稼働中の d6e インスタンス**に接続して d6e Plugin を
-開発・テストする方法を説明します。最後の仕上げまで、d6e へのデプロイは
-一切不要です。
+このガイドは、**ローカルの AI コーディングエージェント**（Codex CLI、
+Claude Code、Cursor など、シェルコマンドの実行や MCP サーバーへの接続が
+できるエージェント）から**稼働中の d6e インスタンス**に接続して d6e
+Plugin を開発・テストする方法を説明します。最後の仕上げまで、d6e への
+デプロイは一切不要です。
 
 これを可能にしている核心は、**d6e の AI エージェントができることはすべて
 インスタンスの公開 HTTP API として提供されている**という事実です。d6e 内
@@ -16,14 +16,14 @@ Code、Cursor など、シェルコマンドの実行や MCP サーバーへの�
 
 ```
 ┌────────────────────┐        ┌────────────────────────────────────┐
-│ ローカル AI ハーネス │        │ d6e インスタンス (https://…)       │
-│ (Codex / Claude     │  MCP   │  ┌──────────┐   ┌──────────────┐  │
-│  Code / Cursor)     │───────▶│  │ MCP :8081│──▶│ Rust API      │  │
-│                     │  REST  │  └──────────┘   │  /api/v1/*    │  │
-│  Docker STF 開発は  │───────▶│                 │  SQL / STF /  │  │
-│  ローカル Docker    │        │                 │  Drive / SaaS │  │
-└────────────────────┘        │                 └──────┬───────┘  │
-                               │            PostgreSQL ◀┘          │
+│ ローカル AI         │        │ d6e インスタンス (https://…)       │
+│ エージェント        │  MCP   │  ┌──────────┐   ┌──────────────┐  │
+│ (Codex / Claude     │───────▶│  │ MCP :8081│──▶│ Rust API      │  │
+│  Code / Cursor)     │  REST  │  └──────────┘   │  /api/v1/*    │  │
+│                     │───────▶│                 │  SQL / STF /  │  │
+│  Docker STF 開発は  │        │                 │  Drive / SaaS │  │
+│  ローカル Docker    │        │                 └──────┬───────┘  │
+└────────────────────┘        │            PostgreSQL ◀┘          │
                                └────────────────────────────────────┘
 ```
 
@@ -35,7 +35,7 @@ Code、Cursor など、シェルコマンドの実行や MCP サーバーへの�
 | Google Drive のファイル | リモート（同期ミラー） | `SELECT * FROM drive_files` + `d6e_read_drive_file` |
 | SaaS 呼び出し（freee、Google Workspace など） | リモート（サーバー管理の認証情報） | `POST /api/v1/saas-proxy` または MCP `d6e_call_external_api` |
 | ワークフロー | リモート | `POST /api/v1/workflows/{id}/execute` または MCP `d6e_execute_workflow` |
-| テンプレートプロンプトの挙動 | ローカルハーネス ≈ d6e チャット | [d6e チャットエージェントとの挙動差](#9-d6e-チャットエージェントとの挙動差)参照 |
+| テンプレートプロンプトの挙動 | ローカルエージェント ≈ d6e チャット | [d6e チャットエージェントとの挙動差](#9-d6e-チャットエージェントとの挙動差)参照 |
 
 本文中のプレースホルダ:
 
@@ -45,83 +45,23 @@ Code、Cursor など、シェルコマンドの実行や MCP サーバーへの�
 
 ---
 
-## 1. 認証情報の取得（初回のみ、約 2 分）
+## 1. API キーの取得（初回のみ、約 1 分）
 
 すべての `/api/v1/*` エンドポイントは `Authorization: Bearer <token>` を
-受け付けます。トークンは **短命の JWT**（OAuth2 ログインで取得）か
-**長命の API キー**（`d6e_…`）のどちらかです。ハーネスでの作業には API
-キーを使います。JWT は API キーを作成する最初の一回だけ必要です。
+受け付けます。ローカル開発には長命の **API キー**（`d6e_…`）を使います。
+d6e コンソールから作成できます:
 
-### 1-a. OAuth2 で JWT を取得（loopback リダイレクト）
+1. コンソール（`${D6E_BASE_URL}`）にログインします。
+2. ヘッダーのアバター →「**APIキー**」（`/{locale}/user/api-keys`）を
+   開きます。ワークスペース設定ページの連携セクション（クライアント ID・
+   ワークスペース ID の隣）からも同じページへのリンクがあります。
+3. キーを作成し、表示された `d6e_…` の値をコピーします — **表示は一度
+   きり**です。有効期限は省略可能で、省略すると無期限のキーになります。
 
-loopback リダイレクト URI — `localhost`、`127.0.0.0/8`、`[::1]` の
-**任意のポート・任意のパス** — は d6e-auth とインスタンスのトークン
-リレーの両方で常に許可されます（d6e ≥ v0.20.1）。allow-list への登録は
-不要です。
-
-1. インスタンスの OAuth クライアント ID（`d6e_…` — API キーとは別物）を
-   取得します。ワークスペース設定ページ
-   （`/{locale}/workspaces/{id}/settings`、ワークスペース admin ロールが
-   必要）の **連携情報** セクションに表示されています。見られない場合は
-   インスタンス運用者に確認してください（インスタンスの `.env` の
-   `D6E_AUTH_CLIENT_ID`）。
-
-2. ブラウザで次の URL を開きます（手動実行なら `state` は任意の値で
-   構いません）:
-
-   ```
-   ${D6E_AUTH_URL}/auth/login?client_id=${CLIENT_ID}&redirect_uri=http://localhost:8976/cb&state=manual&response_type=code
-   ```
-
-3. リダイレクトを受け取ります。最も簡単なのは、ログイン前に使い捨ての
-   リスナーを立てておくことです:
-
-   ```bash
-   python3 -c "
-   from http.server import BaseHTTPRequestHandler, HTTPServer
-   class H(BaseHTTPRequestHandler):
-       def do_GET(self):
-           print(self.path)  # /cb?code=...&state=manual
-           self.send_response(200); self.end_headers()
-           self.wfile.write(b'code received - close this tab')
-   HTTPServer(('127.0.0.1', 8976), H).handle_request()"
-   ```
-
-   （リスナーを立てない場合、ブラウザには接続エラーが表示されますが
-   アドレスバーに `code=` が残っているのでそこからコピーできます。）
-
-4. code を**インスタンス側で**交換します（d6e-auth ではありません —
-   インスタンスが自身のクライアント認証情報を注入するため、client
-   secret は一切不要です）:
-
-   ```bash
-   curl -s ${D6E_BASE_URL}/api/v1/auth/token \
-     -H 'Content-Type: application/json' \
-     -d '{"grant_type":"authorization_code","code":"<CODE>","redirect_uri":"http://localhost:8976/cb"}'
-   # -> { "access_token": "...", "refresh_token": "...", ... }
-   ```
-
-### 1-b. 長命の API キーを発行
-
-d6e > v0.21.0 のインスタンスでは下記の curl は不要です。コンソールを
-開き、ヘッダーのアバター →「**APIキー**」（`/{locale}/user/api-keys`）
-から UI で作成できます（この場合 1-a の手順も不要です — コンソールへの
-ログイン自体が OAuth2 フローだからです）。旧バージョンでは API で発行
-します:
-
-```bash
-curl -s -X POST ${D6E_BASE_URL}/api/v1/api-keys \
-  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"codex-local-dev"}'
-# -> { "key": "d6e_0198...", ... }   ← 表示は一度きり。必ず保存
-```
-
-`expires_at`（ISO 8601）は省略可能で、省略すると無期限のキーになります。
-キーはあなたのユーザー ID とワークスペースメンバーシップを引き継ぎます。
-以降はすべて `Authorization: Bearer d6e_…` を使い、ワークスペース
-スコープのエンドポイントには `X-Workspace-ID: ${WORKSPACE_ID}` ヘッダを
-付けます。
+API キーはワークスペース毎ではなく**あなたのユーザーアカウントに紐づき**、
+あなたのワークスペースメンバーシップを引き継ぎます。以降はすべて
+`Authorization: Bearer d6e_…` を使い、ワークスペーススコープのエンド
+ポイントには `X-Workspace-ID: ${WORKSPACE_ID}` ヘッダを付けます。
 
 動作確認:
 
@@ -131,15 +71,16 @@ curl -s ${D6E_BASE_URL}/api/v1/workspaces -H "Authorization: Bearer ${D6E_API_KE
 
 ---
 
-## 2. ハーネスをインスタンスの MCP サーバーに接続する（推奨）
+## 2. エージェントをインスタンスの MCP サーバーに接続する（推奨）
 
 インスタンスは d6e MCP サーバーを HTTP モードで実行しています
 （デフォルトポート **8081**、パス `/mcp`）。これは *d6e チャット
 エージェントが使っているのと同じサーバー・同じ約 90 個の `d6e_*`
-ツール*です。ハーネスをここに接続すれば、ホストされたエージェントと
-ツール単位で完全に同等になります: `d6e_sql`、`d6e_list_files`、
-`d6e_search_files`、`d6e_read_drive_file`、`d6e_call_external_api`、
-`d6e_instant_run_stf`、`d6e_execute_workflow`、`d6e_create_stf` など。
+ツール*です。ローカルエージェントをここに接続すれば、ホストされた
+エージェントとツール単位で完全に同等になります: `d6e_sql`、
+`d6e_list_files`、`d6e_search_files`、`d6e_read_drive_file`、
+`d6e_call_external_api`、`d6e_instant_run_stf`、`d6e_execute_workflow`、
+`d6e_create_stf` など。
 
 > 注意: 現行のデプロイ構成ではポート 8081 は素の HTTP です（リバース
 > プロキシが TLS 終端するのはコンソールと `/api/v1` のみ）。API キーの
@@ -181,7 +122,7 @@ claude mcp add --transport http d6e http://<instance-host>:8081/mcp \
 ワークスペーススコープのツールを使ってください。
 
 MCP を使いたくない場合も、以降の各セクションに生の REST 相当の呼び出しを
-載せています — ハーネスからの `curl` でも全く同じことができます。
+載せています — `curl` でも全く同じことができます。
 
 ---
 
@@ -262,8 +203,9 @@ curl -s -X POST ${D6E_BASE_URL}/api/v1/drive-sync/read \
 SaaS の認証情報（freee、Google Workspace、Chatwork、Notion、GitHub、
 Salesforce、Box、マネーフォワード、Zendesk への OAuth 接続）は、
 ワークスペースメンバーが **d6e コンソールで一度だけ**設定し、サーバー側に
-暗号化して保存されます。ハーネスがトークンを見ることはありません —
-プロキシを呼ぶと、インスタンスが認証を注入しリフレッシュも処理します:
+暗号化して保存されます。ローカルエージェントがトークンを見ることは
+ありません — プロキシを呼ぶと、インスタンスが認証を注入しリフレッシュも
+処理します:
 
 ```bash
 # freee: 事業所一覧（MCP: d6e_call_external_api）
@@ -345,10 +287,9 @@ curl -s -X POST ${D6E_BASE_URL}/api/v1/stfs/instant-run \
 MCP では `d6e_instant_run_stf` が相当します（保存済み STF を再実行する
 `stf_id` / `stf_version_id` も受け付けます）。
 
-編集・実行ループは、ハーネスでローカルに `my-stf.js` を編集 →
-instant-run → 出力/エラーを読む → 繰り返し、です。動くようになったら
-`d6e_create_stf` / `POST /api/v1/stfs` で保存するか、`template.yaml` に
-載せて配布します。
+編集・実行ループは、ローカルで `my-stf.js` を編集 → instant-run →
+出力/エラーを読む → 繰り返し、です。動くようになったら `d6e_create_stf`
+/ `POST /api/v1/stfs` で保存するか、`template.yaml` に載せて配布します。
 
 ランタイム環境（Node との違いとして覚えておくべき点）:
 
@@ -413,7 +354,7 @@ echo '{
 ## 8. ワークフロー
 
 ワークフロー（入力 → STF ステップ → effect ステップ）は常にインスタンス
-上で実行されます。ハーネスからは:
+上で実行されます。ローカルエージェントからは:
 
 ```bash
 # リクエスト body がそのままワークフロー入力になります（ラッパーなし）
@@ -432,8 +373,8 @@ MCP: `d6e_execute_workflow`。実験中の作成・更新は `d6e_create_workflo
 
 ## 9. d6e チャットエージェントとの挙動差
 
-「自分のハーネス + インスタンス MCP」は「d6e チャットエージェント」に
-どこまで近いのか？
+「ローカルエージェント + インスタンス MCP」は「d6e チャットエージェント」
+にどこまで近いのか？
 
 **同一のもの:**
 
@@ -447,13 +388,13 @@ MCP: `d6e_execute_workflow`。実験中の作成・更新は `d6e_create_workflo
 - **システムプロンプト。** d6e エージェントのコンテキストはワークスペース
   から組み立てられます: インストール済みプラグインの `template_prompt`
   （`## PLUGIN: namespace/name@version` セクションとして）、ワークスペース
-  のプロンプトルール、プロダクトの指示。ハーネス側には代わりにベンダーの
-  プロンプトとあなたのローカルルールが入ります。
+  のプロンプトルール、プロダクトの指示。ローカルエージェント側には
+  代わりにベンダーのプロンプトとあなたのローカルルールが入ります。
 - **モデル。** d6e チャットはワークスペースで設定されたモデルを、
-  ハーネスは自身のサブスクリプションのモデルを使います。
+  ローカルエージェントは自身のサブスクリプションのモデルを使います。
 
 ローカルの実験をデプロイ後のプラグインに近づけるには、作成中の
-`template_prompt` をハーネスのプロジェクトルール（`AGENTS.md` /
+`template_prompt` をエージェントのプロジェクトルール（`AGENTS.md` /
 `CLAUDE.md` / `.cursor/rules/`）に貼り付けながら反復してください。残る
 差分はベンダープロンプトの味付けだけで、ツールの挙動には影響しません —
 言い回しと計画スタイルが変わる程度です。
@@ -465,31 +406,65 @@ MCP: `d6e_execute_workflow`。実験中の作成・更新は `d6e_create_workflo
 
 ---
 
-## 10. 実験から Plugin へ
+## 10. 実験から Plugin 公開まで
 
-ハーネスから各部品が動くようになったら:
+ローカルエージェントから各部品が動くようになったら、公開までの手順は
+次の通りです。
+
+### 10-a. パッケージ化してインストール
 
 1. リソースを `template.yaml` にまとめます
    （[d6e-plugin-development スキル](../skills/d6e-plugin-development/SKILL.md)
    と [template-yaml-spec.md](./template-yaml-spec.md) を参照）:
    `template_prompt`、`stfs`（インライン JS または Docker イメージ参照）、
    `files`、`effects`、`workflows`。
-2. インスタンスから到達できる raw URL でホストします（プラグイン
-   リポジトリの GitLab raw URL）。
+2. リポジトリを push します — **GitHub でも GitLab でも構いません**
+   （`template.yaml` をルートに置く）。Install from URL は web URL を
+   raw/API URL に自動変換するので、リポジトリの URL を貼るだけで十分
+   です。**プライベートリポジトリ**の場合は、インストール時に読み取り
+   権限のあるパーソナルアクセストークン（PAT）の入力も求められます。
 3. テスト用ワークスペースにインストール: コンソール → プラグイン →
    **URLからインストール** — 開発時・チーム内プラグインの推奨経路です。
+   push のたびに再実行すると、リソースがその場で更新されます。
 4. d6e チャット UI で確認します（本物のシステムプロンプト組み立てを
    通すのはこのステップです）。
-5. 必要なら
-   [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
+
+### 10-b. カスタムフロントエンドがある場合
+
+プラグインには専用フロントエンド（インスタンスの API を呼ぶ独自の
+Web アプリ）を付けられます。認証・セッション・プロキシのパターンは
+[d6e-custom-frontend-skills](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills)
+を参照してください。この場合、公開までに次のステップが追加されます:
+
+5. 稼働中のインスタンスに向けてフロントエンドを実装します。開発中は
+   **loopback リダイレクト URI**（`localhost`、`127.0.0.0/8`、`[::1]` —
+   任意のポート・任意のパス）での OAuth2 ログインが登録なしで動きます
+   （d6e ≥ v0.20.1）。
+6. フロントエンドをデプロイしたら、その**本番用**リダイレクト URI
+   （例: `https://your-app.example.com/auth/callback`）を**両方**に
+   登録します:
+   - **d6e-auth**: フランチャイズのオーナー / 管理者が
+     `${D6E_AUTH_URL}/{locale}/account/franchise` でセルフサービス登録
+     （クライアントのリダイレクト URI リスト）;
+   - **d6e インスタンス**: インスタンスの `.env` の
+     `ALLOWED_REDIRECT_URIS` に URI を追加。
+7. `.env` の変更を反映するため、**d6e インスタンスを再デプロイ / 再起動**
+   します（インスタンスホストで `docker compose up -d` など）。
+   インスタンス自体に触る唯一のステップなので、インスタンス運用者と
+   調整してください。
+
+### 10-c. マーケットプレイス掲載（任意）
+
+8. [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
    へのマージリクエストでマーケットプレイスに公開します。
 
 ### チェックリスト
 
-- [ ] API キーを作成して保存した（`d6e_…`）
-- [ ] ハーネスを `http://<instance-host>:8081/mcp` に接続した（または curl で REST）
-- [ ] SQL / Drive / SaaS 呼び出しをハーネスから確認した
+- [ ] API キーをコンソールで作成して保存した（`d6e_…`）
+- [ ] ローカルエージェントを `http://<instance-host>:8081/mcp` に接続した（または curl で REST）
+- [ ] SQL / Drive / SaaS 呼び出しをローカルエージェントから確認した
 - [ ] JS STF を instant-run で検証した（ローカル Node の代用ではなく）
 - [ ] Docker STF をローカル `docker run` で検証し、次に `api_url` をインスタンスに向けて検証した
-- [ ] 反復中は `template_prompt` の下書きをローカルハーネスのルールに写した
-- [ ] `template.yaml` を URL からインストールして d6e チャットで再確認した
+- [ ] 反復中は `template_prompt` の下書きをローカルエージェントのルールに写した
+- [ ] `template.yaml` を URL からインストールし（プライベートリポジトリなら PAT を入力）、d6e チャットで再確認した
+- [ ] （カスタムフロントエンドの場合）本番リダイレクト URI を d6e-auth **と**インスタンスの `ALLOWED_REDIRECT_URIS` の両方に登録し、インスタンスを再起動した
