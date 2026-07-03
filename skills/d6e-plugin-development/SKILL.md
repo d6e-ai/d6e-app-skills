@@ -495,6 +495,16 @@ Then verify in the workspace: the STFs/workflows appear with
 `{namespace}/{plugin}/` name prefixes, and `d6e_execute_workflow` /
 `d6e_instant_run_stf` can exercise them.
 
+**Developing from a local AI harness (Codex / Claude Code / Cursor):**
+you can iterate against the live instance long before packaging —
+connect the harness to the instance's MCP server (or call `/api/v1/*`
+with an API key) to run SQL, read synced Drive files, call SaaS APIs
+through the server-held credentials, and instant-run JS STF drafts in
+the real QuickJS runtime. See
+[`docs/local-ai-development.md`](../../docs/local-ai-development.md)
+for the full setup (auth, MCP config per harness, and what differs from
+the hosted d6e chat agent).
+
 ## Distributing Your Plugin
 
 Two distribution paths — most plugins only ever need the first one:

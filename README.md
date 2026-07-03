@@ -55,6 +55,7 @@ After installation, type `@skills` in Cursor Composer to verify `d6e-plugin-deve
 - **[template.yaml Specification](./docs/template-yaml-spec.md)** — Full field reference / 全フィールドリファレンス
 - **[Security Guidelines](./docs/security-guidelines.md)** — Security best practices for plugin authors / セキュリティガイドライン
 - **[Publishing Guide](./docs/publishing.md)** — Manual install (recommended for development) and marketplace listing via d6e-plugin-registry / 手動インストール（開発時推奨）と d6e-plugin-registry 経由のマーケットプレイス掲載
+- **[Local AI Harness Development](./docs/local-ai-development.md)** — Develop and test plugins from Codex / Claude Code / Cursor against a live d6e instance (auth, MCP, SQL, Drive, SaaS proxy, STF instant-run) / ローカルAIハーネスからd6eインスタンスに接続して開発・テストする方法
 
 ## Examples / サンプル
 
