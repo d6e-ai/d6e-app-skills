@@ -44,6 +44,29 @@ Account-level operations (login, redirect URI registration) happen on
 the central d6e site, [https://www.d6e.ai](https://www.d6e.ai) — there
 is no other value for it.
 
+## Scope: this guide is about Plugins, not custom frontends
+
+d6e can be extended on two sides of the same API line, and this guide
+covers only the first:
+
+- A **Plugin** packages *workspace contents* — `template_prompt`,
+  tables/policies, STFs, workflows, effects — into a `template.yaml`
+  that is installed **into** the instance and executed **by** the
+  instance. Users interact with it through the built-in d6e console and
+  chat. That is what the rest of this document develops and tests.
+- A **custom frontend** is a separately deployed web app (your own
+  domain and hosting) that signs users in via
+  [https://www.d6e.ai](https://www.d6e.ai) and drives a workspace
+  through the instance's public APIs — the same APIs used below. It is
+  not installed into d6e and typically *consumes* what a Plugin
+  provisions.
+
+If you are building the latter, or are unsure how the frontend, the
+instance, and the central account site relate, read
+[Custom Frontends and the d6e Instance](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.md)
+in the d6e-custom-frontend-skills repository first, then come back here
+for the workspace side.
+
 ---
 
 ## 1. Get an API key (one-time, ~1 minute)
@@ -424,7 +447,10 @@ Once the pieces work from your local agent, the path to release is:
 A plugin can come with a dedicated frontend (its own web app calling the
 instance's APIs — see
 [d6e-custom-frontend-skills](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills)
-for the auth / session / proxy patterns). That adds these release steps:
+for the auth / session / proxy patterns, and
+[frontend-and-instance.md](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.md)
+for how the frontend, instance, and central account site relate). That
+adds these release steps:
 
 5. Build the frontend against the live instance. During development,
    OAuth2 login with **loopback redirect URIs** (`localhost`,
