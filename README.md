@@ -1,68 +1,68 @@
-# d6e App Skills
+# d6e Plugin Skills
 
-[![Skills](https://img.shields.io/badge/skills.sh-d6e--app--skills-blue)](https://skills.sh/d6e-ai/d6e-app-skills/d6e-app-development)
-[![GitLab](https://img.shields.io/badge/GitLab-d6e--ai%2Fd6e--app--skills-FC6D26?logo=gitlab)](https://gitlab.com/cauchye/d6e-ai/d6e-app-skills)
+[![Skills](https://img.shields.io/badge/skills.sh-d6e--plugin--skills-blue)](https://skills.sh/d6e-ai/d6e-plugin-skills/d6e-plugin-development)
+[![GitLab](https://img.shields.io/badge/GitLab-d6e--ai%2Fd6e--plugin--skills-FC6D26?logo=gitlab)](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Agent Skills for developing and publishing d6e Apps — reusable workspace configurations for the d6e platform.
+Agent Skills for developing and publishing d6e Plugins — reusable workspace configurations for the d6e platform.
 
-d6eアプリの開発・公開を支援するAgent Skillsです。d6eプラットフォーム向けの再利用可能なワークスペース設定をパッケージ化できます。
+d6eプラグインの開発・公開を支援するAgent Skillsです。d6eプラットフォーム向けの再利用可能なワークスペース設定をパッケージ化できます。
 
 ## What is This? / これは何？
 
-This repository contains **Agent Skills** that teach Claude and Cursor how to help developers create d6e App packages. A d6e App bundles prompts, STFs, files, effects, and workflows into a distributable `template.yaml` manifest.
+This repository contains **Agent Skills** that teach Claude and Cursor how to help developers create d6e Plugin packages. A d6e Plugin bundles prompts, STFs, files, effects, and workflows into a distributable `template.yaml` manifest.
 
-このリポジトリには、Claude や Cursor が開発者の d6e アプリ作成を支援するための **Agent Skills** が含まれています。d6e アプリは、プロンプト・STF・ファイル・エフェクト・ワークフローを `template.yaml` マニフェストにまとめた配布可能なパッケージです。
+このリポジトリには、Claude や Cursor が開発者の d6e プラグイン作成を支援するための **Agent Skills** が含まれています。d6e プラグインは、プロンプト・STF・ファイル・エフェクト・ワークフローを `template.yaml` マニフェストにまとめた配布可能なパッケージです。
 
 ## Available Skills / 利用可能なスキル
 
-### [d6e App Development](./skills/d6e-app-development/SKILL.md)
+### [d6e Plugin Development](./skills/d6e-plugin-development/SKILL.md)
 
-Guides AI agents through creating d6e Apps, including:
+Guides AI agents through creating d6e Plugins, including:
 
 - `template.yaml` manifest structure and all fields
 - STF definitions (JS, WASM, Docker runtimes)
 - File, effect, and workflow packaging
 - Prompt separation (template_prompt vs custom_prompt)
-- Distribution: manual install (Install from URL) and marketplace listing via d6e-app-registry
+- Distribution: manual install (Install from URL) and marketplace listing via d6e-plugin-registry
 - Security best practices
 
-AIエージェントによる d6e アプリ作成をガイドします:
+AIエージェントによる d6e プラグイン作成をガイドします:
 
 - `template.yaml` マニフェストの構造と全フィールド
 - STF定義（JS、WASM、Docker ランタイム）
 - ファイル、エフェクト、ワークフローのパッケージング
 - プロンプトの分離（template_prompt vs custom_prompt）
-- 配布: 手動インストール（Install from URL）と d6e-app-registry 経由のマーケットプレイス掲載
+- 配布: 手動インストール（Install from URL）と d6e-plugin-registry 経由のマーケットプレイス掲載
 - セキュリティのベストプラクティス
 
 ## Installation / インストール
 
 ```bash
-npx skills add https://gitlab.com/cauchye/d6e-ai/d6e-app-skills --skill d6e-app-development
+npx skills add https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills --skill d6e-plugin-development
 ```
 
 > This repository is hosted on GitLab, so the full URL is required — the GitHub-style `owner/repo` shorthand does not work.
 >
 > このリポジトリは GitLab でホストされているため、フル URL の指定が必要です。GitHub 形式の `owner/repo` 省略記法は使えません。
 
-After installation, type `@skills` in Cursor Composer to verify `d6e-app-development` is available.
+After installation, type `@skills` in Cursor Composer to verify `d6e-plugin-development` is available.
 
-インストール後、Cursor Composer で `@skills` と入力し、`d6e-app-development` が利用可能であることを確認してください。
+インストール後、Cursor Composer で `@skills` と入力し、`d6e-plugin-development` が利用可能であることを確認してください。
 
 ## Documentation / ドキュメント
 
 - **[template.yaml Specification](./docs/template-yaml-spec.md)** — Full field reference / 全フィールドリファレンス
-- **[Security Guidelines](./docs/security-guidelines.md)** — Security best practices for app authors / セキュリティガイドライン
-- **[Publishing Guide](./docs/publishing.md)** — Manual install (recommended for development) and marketplace listing via d6e-app-registry / 手動インストール（開発時推奨）と d6e-app-registry 経由のマーケットプレイス掲載
+- **[Security Guidelines](./docs/security-guidelines.md)** — Security best practices for plugin authors / セキュリティガイドライン
+- **[Publishing Guide](./docs/publishing.md)** — Manual install (recommended for development) and marketplace listing via d6e-plugin-registry / 手動インストール（開発時推奨）と d6e-plugin-registry 経由のマーケットプレイス掲載
 
 ## Examples / サンプル
 
-The `examples/` directory contains complete d6e App packages:
+The `examples/` directory contains complete d6e Plugin packages:
 
-`examples/` ディレクトリには完全な d6e アプリパッケージが含まれています:
+`examples/` ディレクトリには完全な d6e プラグインパッケージが含まれています:
 
-| App | Description | 説明 |
+| Plugin | Description | 説明 |
 |-----|-------------|------|
 | [accounting-assistant](./examples/accounting-assistant/) | Journal entry validation with chart of accounts | 勘定科目表を使った仕訳検証 |
 | [sales-analytics](./examples/sales-analytics/) | Sales KPI aggregation with Slack alerts | 売上KPI集計とSlackアラート |
@@ -76,8 +76,8 @@ name: hello-world
 namespace: d6e
 version: v0.1.0
 description:
-  en-US: A minimal d6e App that demonstrates the template structure.
-  ja-JP: テンプレート構造を示す最小限のd6eアプリ。
+  en-US: A minimal d6e Plugin that demonstrates the template structure.
+  ja-JP: テンプレート構造を示す最小限のd6eプラグイン。
 
 template_prompt: |
   You are a friendly greeting assistant.
@@ -102,8 +102,8 @@ npx ajv-cli validate -s schema/template.schema.json -d template.yaml
 ## Related Resources / 関連リソース
 
 - [d6e Platform](https://gitlab.com/cauchye/d6e-ai/d6e) — Main d6e repository / d6e メインリポジトリ
-- [d6e App Marketplace](https://gitlab.com/cauchye/d6e-ai/d6e-app-marketplace) — App catalog website / アプリカタログサイト
-- [d6e App Registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry) — Marketplace listing data; submit an MR here to get listed / マーケットプレイス掲載データ（掲載はここへのMRで申請）
+- [d6e Plugin Marketplace](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-marketplace) — Plugin catalog website / プラグインカタログサイト
+- [d6e Plugin Registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry) — Marketplace listing data; submit an MR here to get listed / マーケットプレイス掲載データ（掲載はここへのMRで申請）
 - [d6e Docker STF Skills](https://gitlab.com/cauchye/d6e-ai/d6e-docker-stf-skills) — Skills for Docker STF development / Docker STF 開発スキル
 - [skills.sh](https://skills.sh) — The Open Agent Skills Ecosystem / オープンAgent Skillsエコシステム
 

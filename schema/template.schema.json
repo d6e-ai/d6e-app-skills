@@ -1,14 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "d6e App Template",
-  "description": "Schema for d6e App template.yaml manifest files.",
+  "title": "d6e Plugin Template",
+  "description": "Schema for d6e Plugin template.yaml manifest files.",
   "type": "object",
   "required": ["name", "namespace", "version", "description"],
   "properties": {
     "name": {
       "type": "string",
       "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
-      "description": "App name (lowercase, hyphens allowed)"
+      "description": "Plugin name (lowercase, hyphens allowed)"
     },
     "namespace": {
       "type": "string",
@@ -25,7 +25,7 @@
         {
           "type": "string",
           "maxLength": 200,
-          "description": "Short description of the app (single language)"
+          "description": "Short description of the plugin (single language)"
         },
         {
           "type": "object",
@@ -104,7 +104,7 @@
       "properties": {
         "name": { "type": "string", "description": "Effect identifier (referenced in workflow effect_name)" },
         "description": { "type": "string", "description": "What this effect does" },
-        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Optional semver version WITHOUT the v prefix (e.g., 1.0.0). Defaults to the app version" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Optional semver version WITHOUT the v prefix (e.g., 1.0.0). Defaults to the plugin version" },
         "url": { "type": "string", "description": "Target URL" },
         "method": { "type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"], "description": "HTTP method" },
         "header_mappings": { "type": "object", "description": "Header mappings ($.path = variable resolved against the effect step input; other strings are constants)" },

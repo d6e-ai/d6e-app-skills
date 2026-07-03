@@ -1,13 +1,13 @@
 ---
-name: d6e-app-development
-description: Creates d6e App packages — reusable workspace configurations with prompts, STFs, files, effects, and workflows. Use when building a distributable d6e App, creating template.yaml manifests, or packaging workspace setups for the d6e App Marketplace.
+name: d6e-plugin-development
+description: Creates d6e Plugin packages — reusable workspace configurations with prompts, STFs, files, effects, and workflows. Use when building a distributable d6e Plugin, creating template.yaml manifests, or packaging workspace setups for the d6e Plugin Marketplace.
 ---
 
-# d6e App Development
+# d6e Plugin Development
 
 ## Overview
 
-A d6e App is a distributable package that configures a d6e workspace with a combination of:
+A d6e Plugin is a distributable package that configures a d6e workspace with a combination of:
 
 - **Template Prompt** — System prompt injected into the AI agent's context
 - **STFs** (State Transition Functions) — Custom logic (JS, WASM, or Docker)
@@ -15,19 +15,19 @@ A d6e App is a distributable package that configures a d6e workspace with a comb
 - **Effects** — External API integrations with header/body mapping
 - **Workflows** — Pipelines combining input steps, STF steps, and effect steps
 
-Apps are defined by a `template.yaml` manifest. They are installed into
+Plugins are defined by a `template.yaml` manifest. They are installed into
 a workspace either manually (the console's **Install from URL** —
-recommended for development and team-internal apps) or from the d6e App
+recommended for development and team-internal plugins) or from the d6e Plugin
 Marketplace, whose listings are maintained by merge request in the
-[d6e-app-registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry)
+[d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
 repository.
 
 ## When to Use
 
 Apply this skill when users request:
 
-- "Create a d6e app"
-- "Package this workspace as an app"
+- "Create a d6e plugin"
+- "Package this workspace as an plugin"
 - "Build a d6e template"
 - "Create a template.yaml for d6e"
 - "Publish a workspace configuration"
@@ -37,17 +37,17 @@ Apply this skill when users request:
 
 ### template.yaml
 
-The manifest file that declares all resources in an app. Located at the root of the app repository.
+The manifest file that declares all resources in an plugin. Located at the root of the plugin repository.
 
 ```yaml
-name: my-app
+name: my-plugin
 namespace: my-org
 version: v1.0.0
-description: Short description of what this app does.
+description: Short description of what this plugin does.
 # description can also be localized:
 # description:
-#   en-US: Short description of what this app does.
-#   ja-JP: このアプリの短い説明。
+#   en-US: Short description of what this plugin does.
+#   ja-JP: このプラグインの短い説明。
 
 template_prompt: |
   You are a specialized assistant for [domain].
@@ -78,7 +78,7 @@ files:
 effects:
   - name: notify-slack
     description: Sends notification to Slack
-    # version is optional — defaults to the app version.
+    # version is optional — defaults to the plugin version.
     # If you set it explicitly, use plain semver WITHOUT the "v" prefix
     # (the API rejects "v1.0.0"): version: "1.0.0"
     url: https://hooks.slack.com/services/xxx
@@ -112,7 +112,7 @@ workflows:
             target: message
 ```
 
-Note the two different mapping syntaxes (a common source of broken apps):
+Note the two different mapping syntaxes (a common source of broken plugins):
 
 | Where | Syntax | Resolved against |
 |-------|--------|------------------|
@@ -125,10 +125,10 @@ as `"$.message"`.
 
 ### How Installation Works
 
-Apps are installed from the workspace's **Apps** page in the d6e console.
+Plugins are installed from the workspace's **Plugins** page in the d6e console.
 Only **workspace admins** can install. There are two paths:
 
-- **Browse tab**: apps registered in the marketplace registry.
+- **Browse tab**: plugins registered in the marketplace registry.
 - **Install from URL**: any `template.yaml` URL (GitHub / GitLab web URLs
   are auto-rewritten to raw/API URLs; an access token can be supplied for
   private repositories).
@@ -153,9 +153,9 @@ When installing, the installer performs these transformations:
 
 Additional behaviors to be aware of:
 
-- **Resource names are prefixed**: an STF `process-data` in app
-  `my-org/my-app` is created as `my-org/my-app/process-data`. This is how
-  d6e distinguishes app resources and how re-installs find existing ones.
+- **Resource names are prefixed**: an STF `process-data` in plugin
+  `my-org/my-plugin` is created as `my-org/my-plugin/process-data`. This is how
+  d6e distinguishes plugin resources and how re-installs find existing ones.
 - **Version prefix is stripped**: the manifest's `v1.0.0` becomes `1.0.0`
   when registering STF/effect versions (the API only accepts plain semver).
 - **Docker `env` values become install-time prompts**: for each key in a
@@ -163,7 +163,7 @@ Additional behaviors to be aware of:
   the admin enters are stored as **encrypted STF secrets** (and the key is
   listed in the Docker config's `secret_keys`); keys left blank fall back
   to the plain-text value written in `template.yaml`.
-- **Re-install / update**: if the app is already installed, the installer
+- **Re-install / update**: if the plugin is already installed, the installer
   creates new STF/effect *versions* under the same resources and updates
   workflows in place.
 
@@ -173,28 +173,28 @@ This means `template.yaml` uses **human-readable names and file paths** as a dec
 
 Every resource uses `namespace/name@version` for identification:
 
-- `d6e/hello-world@v1.0.0` — namespace `d6e`, app `hello-world`, version `v1.0.0`
-- Namespace must match the app author's registered namespace
+- `d6e/hello-world@v1.0.0` — namespace `d6e`, plugin `hello-world`, version `v1.0.0`
+- Namespace must match the plugin author's registered namespace
 - Version follows semver (vMAJOR.MINOR.PATCH)
 
 ### Prompt Separation
 
-Apps define a `template_prompt` that is injected into the AI agent's system context. This is separate from the workspace's `custom_prompt` which users edit freely. Both are combined at runtime:
+Plugins define a `template_prompt` that is injected into the AI agent's system context. This is separate from the workspace's `custom_prompt` which users edit freely. Both are combined at runtime:
 
 ```
-System Prompt = Base Skills + Template Prompts (from apps, ordered by install date) + Custom Prompt (user)
+System Prompt = Base Skills + Template Prompts (from plugins, ordered by install date) + Custom Prompt (user)
 ```
 
-Multiple installed apps each contribute their own `template_prompt`, combined in `installedAt ASC` order with `## APP: namespace/name@version` headers.
+Multiple installed plugins each contribute their own `template_prompt`, combined in `installedAt ASC` order with `## PLUGIN: namespace/name@version` headers.
 
 ## Quick Start
 
-Create a minimal hello-world app in 3 steps:
+Create a minimal hello-world plugin in 3 steps:
 
 ### Step 1: Create directory structure
 
 ```
-my-app/
+my-plugin/
 ├── template.yaml
 ├── prompt.md          # optional, for long prompts
 ├── stfs/
@@ -209,7 +209,7 @@ my-app/
 name: hello-world
 namespace: my-org
 version: v0.1.0
-description: A minimal d6e App example.
+description: A minimal d6e Plugin example.
 
 template_prompt: |
   You are a friendly assistant. Always greet the user warmly.
@@ -287,7 +287,7 @@ Rules:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `name` | string | Yes | App name (lowercase, hyphens allowed) |
+| `name` | string | Yes | Plugin name (lowercase, hyphens allowed) |
 | `namespace` | string | Yes | Author/organization namespace |
 | `version` | string | Yes | Semver version with `v` prefix (e.g., `v1.0.0`) |
 | `description` | string \| object | Yes | Short description (max 200 chars), or a locale map like `{ en-US: ..., ja-JP: ... }` |
@@ -336,7 +336,7 @@ on stderr with non-zero exit).
 |-------|------|----------|-------------|
 | `name` | string | Yes | Effect identifier (used in workflow references) |
 | `description` | string | Yes | What this effect does |
-| `version` | string | No | Defaults to the app version. If set explicitly, use plain semver **without** the `v` prefix (`1.0.0`) — the API rejects `v1.0.0` |
+| `version` | string | No | Defaults to the plugin version. If set explicitly, use plain semver **without** the `v` prefix (`1.0.0`) — the API rejects `v1.0.0` |
 | `url` | string | Yes | Target URL |
 | `method` | string | Yes | HTTP method (GET/POST/PUT/PATCH/DELETE) |
 | `header_mappings` | object | Yes | Header mappings (see syntax below) |
@@ -378,7 +378,7 @@ there is no standalone effect execution API.
 
 Input source types:
 - `{ type: Library, name: "library-name" }` — Load a pre-registered STF library; resolves to `{ code, types, version }`
-- `{ type: File, id: "UUID" }` — Load a file from workspace storage by UUID. **Caution**: the installer does NOT rewrite this — the UUID is passed through as-is, so it can only reference a file that already exists in the target workspace. It cannot reference files bundled in the app's `files` section (those get fresh UUIDs at install time)
+- `{ type: File, id: "UUID" }` — Load a file from workspace storage by UUID. **Caution**: the installer does NOT rewrite this — the UUID is passed through as-is, so it can only reference a file that already exists in the target workspace. It cannot reference files bundled in the plugin's `files` section (those get fresh UUIDs at install time)
 - `{ type: Fetch, url: "...", method: "GET", headers: {...}, body: ..., timeout_secs: 30 }` — Fetch from an external HTTP endpoint at execution time; resolves to the parsed JSON response body
 
 #### STF Step
@@ -418,12 +418,12 @@ typos in field names surface as `null` inputs — double-check spelling.
 
 ## Implementation Checklist
 
-When creating a d6e App, verify:
+When creating a d6e Plugin, verify:
 
 - [ ] `template.yaml` is valid YAML and passes schema validation
 - [ ] `name` uses lowercase letters, numbers, and hyphens only
-- [ ] `namespace` identifies your org — it becomes the `{namespace}/{app}/` resource prefix (and the `registry/{namespace}/` directory if you list the app)
-- [ ] App `version` follows semver format with `v` prefix (`vX.Y.Z`)
+- [ ] `namespace` identifies your org — it becomes the `{namespace}/{plugin}/` resource prefix (and the `registry/{namespace}/` directory if you list the plugin)
+- [ ] Plugin `version` follows semver format with `v` prefix (`vX.Y.Z`)
 - [ ] Effect `version`, if set, has NO `v` prefix (`1.0.0`) — or is omitted
 - [ ] All `source` paths in STFs point to existing files
 - [ ] JS STF code is top-level (`$input` global + final `return`), with NO `export` / function wrapper
@@ -451,22 +451,22 @@ When creating a d6e App, verify:
 
 - Use semver: bump PATCH for fixes, MINOR for features, MAJOR for breaking changes
 - Tag releases in git: `git tag v1.0.0 && git push --tags`
-- Keep a CHANGELOG.md in your app repository
+- Keep a CHANGELOG.md in your plugin repository
 
 ### Naming
 
-- App names: lowercase, hyphens, descriptive (`accounting-assistant`, not `app1`)
+- Plugin names: lowercase, hyphens, descriptive (`accounting-assistant`, not `app1`)
 - STF names: lowercase, hyphens, verb-noun (`process-data`, `validate-input`)
 - Namespace: your GitHub org or username
 
 ### Directory Structure
 
-Recommended layout for an App repository:
+Recommended layout for an Plugin repository:
 
 ```
-my-org/d6e-app-my-app/
-├── template.yaml          # App manifest (required)
-├── README.md              # App documentation (required)
+my-org/d6e-plugin-my-plugin/
+├── template.yaml          # Plugin manifest (required)
+├── README.md              # Plugin documentation (required)
 ├── CHANGELOG.md           # Version history (recommended)
 ├── stfs/                  # STF source files
 │   ├── process-data.js
@@ -480,10 +480,10 @@ my-org/d6e-app-my-app/
 ## Testing Before Publishing (Install from URL)
 
 You do not need marketplace publication to test. On the workspace's
-**Apps** page (`/{locale}/workspaces/{workspace_id}/apps`, workspace
+**Plugins** page (`/{locale}/workspaces/{workspace_id}/plugins`, workspace
 **admin** role required), use **Install from URL**:
 
-1. Push the app repo (public or private) with `template.yaml` at the root
+1. Push the plugin repo (public or private) with `template.yaml` at the root
 2. Paste the repo or `template.yaml` URL (GitHub/GitLab web URLs are
    rewritten to raw/API URLs automatically; private repos take an access
    token)
@@ -492,37 +492,37 @@ You do not need marketplace publication to test. On the workspace's
 4. Re-run Install from URL after each push to update resources in place
 
 Then verify in the workspace: the STFs/workflows appear with
-`{namespace}/{app}/` name prefixes, and `d6e_execute_workflow` /
+`{namespace}/{plugin}/` name prefixes, and `d6e_execute_workflow` /
 `d6e_instant_run_stf` can exercise them.
 
-## Distributing Your App
+## Distributing Your Plugin
 
-Two distribution paths — most apps only ever need the first one:
+Two distribution paths — most plugins only ever need the first one:
 
 ### Path 1: Install from URL (recommended default)
 
 For development, testing, and team-internal distribution, no
 registration is needed anywhere. Push the repository (public or
 private, `template.yaml` at the root) and install it from the
-workspace's **Apps** page → **Install from URL** (workspace admin
+workspace's **Plugins** page → **Install from URL** (workspace admin
 required; see
 [Testing Before Publishing](#testing-before-publishing-install-from-url)
 above). Re-running Install from URL after a push updates the installed
 resources in place — that is the whole release process for a
-self-distributed app.
+self-distributed plugin.
 
-### Path 2: Marketplace listing via d6e-app-registry (only when you need public listing)
+### Path 2: Marketplace listing via d6e-plugin-registry (only when you need public listing)
 
-The marketplace does **not** discover apps automatically. To appear in
+The marketplace does **not** discover plugins automatically. To appear in
 every d6e instance's Browse tab, submit a merge request to
-[d6e-app-registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry)
+[d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
 that adds:
 
-1. `registry/{namespace}/{name}.yaml` — the app's detail page: name,
+1. `registry/{namespace}/{name}.yaml` — the plugin's detail page: name,
    namespace, localized `description`/`readme`/`changelog`, `category`,
    `icon`, and a `versions[]` array whose `manifestUrl` points at the
    raw `template.yaml` of a **tagged release**
-   (e.g. `https://gitlab.com/your-org/d6e-app-your-app/-/raw/v1.0.0/template.yaml`)
+   (e.g. `https://gitlab.com/your-org/d6e-plugin-your-plugin/-/raw/v1.0.0/template.yaml`)
 2. A matching summary entry in `registry/index.yaml`
    (namespace, name, description, tier, category, icon, `latestVersion`)
 
@@ -534,10 +534,10 @@ bump `latestVersion`, or delete the entry.
 See [`docs/publishing.md`](../../docs/publishing.md) for complete YAML
 examples of both registry files.
 
-### How d6e Instances Find Listed Apps
+### How d6e Instances Find Listed Plugins
 
-1. Each d6e instance fetches `registry/index.yaml` via the marketplace HTTP API (`https://marketplace.d6e.ai/api/registry`), which serves the canonical YAMLs stored in [d6e-app-registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry)
-2. The Browse tab on the Apps page displays all entries
+1. Each d6e instance fetches `registry/index.yaml` via the marketplace HTTP API (`https://marketplace.d6e.ai/api/registry`), which serves the canonical YAMLs stored in [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
+2. The Browse tab on the Plugins page displays all entries
 3. When a user clicks Install, d6e fetches the version's `manifestUrl` → gets `template.yaml` → creates resources via Rust API
 
 ## Troubleshooting
@@ -552,8 +552,8 @@ examples of both registry files.
 
 - Effect `version` in template.yaml must be plain semver **without** the
   `v` prefix (`1.0.0`, not `v1.0.0`) — or simply omit it to inherit the
-  app version (recommended)
-- The app-level `version` keeps its `v` prefix; the installer strips it
+  plugin version (recommended)
+- The plugin-level `version` keeps its `v` prefix; the installer strips it
   before calling the API
 
 ### Install error: "STF source file not found" / fetch failed
@@ -600,7 +600,7 @@ examples of both registry files.
 
 ### Docker STF fails with POLICY_DENIED on SQL
 
-- App installation does NOT create SQL policies. After installing, create
+- Plugin installation does NOT create SQL policies. After installing, create
   a policy group containing the installed STF (its id is visible on the
   workspace's STFs page) and add allow policies per table + operation —
   see the `d6e-docker-stf-development` skill
@@ -620,5 +620,5 @@ examples of both registry files.
 ### Installed resources have unexpected names
 
 - This is by design: resources are prefixed as
-  `{namespace}/{app-name}/{resource-name}` at install time. Reference
+  `{namespace}/{plugin-name}/{resource-name}` at install time. Reference
   them by that full name when debugging in the console

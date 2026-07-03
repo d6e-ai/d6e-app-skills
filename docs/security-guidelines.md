@@ -1,4 +1,4 @@
-# Security Guidelines for d6e App Authors
+# Security Guidelines for d6e Plugin Authors
 
 ## Template Prompt Safety
 
@@ -6,7 +6,7 @@ The `template_prompt` field is injected into the AI agent's system context. Mali
 
 ### Do
 
-- Keep prompts focused on the app's domain
+- Keep prompts focused on the plugin's domain
 - Use clear, specific instructions
 - Test prompts to ensure they don't cause unintended behavior
 
@@ -39,8 +39,8 @@ The `template_prompt` field is injected into the AI agent's system context. Mali
 ## Review Process
 
 - Marketplace listing happens via merge request to
-  [d6e-app-registry](https://gitlab.com/cauchye/d6e-ai/d6e-app-registry);
+  [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry);
   the d6e team reviews every submission and assigns the tier
-- Apps enter as `unverified` unless the review grants `verified`
-- The d6e team reviews verified apps for security compliance
+- Plugins enter as `unverified` unless the review grants `verified`
+- The d6e team reviews verified plugins for security compliance
 - Report security issues to security@d6e.ai
