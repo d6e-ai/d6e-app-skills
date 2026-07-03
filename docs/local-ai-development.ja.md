@@ -199,6 +199,14 @@ curl -s -X POST ${D6E_BASE_URL}/api/v1/drive-sync/read \
 テキスト抽出（`d6e_extract_file_text`）や画像表示（`d6e_view_image`）は
 返ってきた storage file ID を受け付けます。
 
+このセクションの操作は REST と同様にすべて MCP でも実行できます。
+探索は `drive_files` への `d6e_sql`、読み取りは `d6e_read_drive_file`、
+同期ルート*外*のファイル取得は `d6e_download_external_file` /
+`d6e_call_external_api` です。唯一の例外は冒頭の Drive 同期の**初期設定**
+（`drive-sync/config` / `roots`）で、対応する MCP ツールはありません —
+SaaS 認証情報の接続と同じく、コンソール（または REST）で一度だけ行う
+運用者側のステップです。
+
 ---
 
 ## 5. SaaS API（freee、Google Workspace など）— トークンを持たずに
