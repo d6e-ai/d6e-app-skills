@@ -60,7 +60,7 @@ files:
 effects:
   - name: notify-slack
     description: Posts a sales summary message to a Slack channel
-    # version omitted — defaults to the app version
+    # version omitted — defaults to the plugin version
     url: https://hooks.slack.com/services/PLACEHOLDER
     method: POST
     header_mappings:
