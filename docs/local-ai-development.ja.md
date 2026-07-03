@@ -40,8 +40,11 @@ Plugin を開発・テストする方法を説明します。最後の仕上げ�
 本文中のプレースホルダ:
 
 - `D6E_BASE_URL` — 対象インスタンス。例: `https://cauchye.d6e.ai`
-- `D6E_AUTH_URL` — 中央認証サーバー。`https://www.d6e.ai`
 - `WORKSPACE_ID` — ワークスペース設定ページ（`${D6E_BASE_URL}/{locale}/workspaces/{id}/settings`）で確認できる UUID
+
+アカウント関連の操作（ログイン、リダイレクト URI の登録）は d6e の
+中央サイト [https://www.d6e.ai](https://www.d6e.ai/ja-JP) で行います —
+これ以外の URL はありません。
 
 ---
 
@@ -443,9 +446,10 @@ Web アプリ）を付けられます。認証・セッション・プロキシ�
 6. フロントエンドをデプロイしたら、その**本番用**リダイレクト URI
    （例: `https://your-app.example.com/auth/callback`）を**両方**に
    登録します:
-   - **d6e-auth**: フランチャイズのオーナー / 管理者が
-     `${D6E_AUTH_URL}/{locale}/account/franchise` でセルフサービス登録
-     （クライアントのリダイレクト URI リスト）;
+   - **[https://www.d6e.ai](https://www.d6e.ai/ja-JP)**（d6e の中央
+     アカウントサイト）: フランチャイズのオーナー / 管理者が
+     `https://www.d6e.ai/{locale}/account/franchise` でセルフサービス
+     登録（クライアントのリダイレクト URI リスト）;
    - **d6e インスタンス**: インスタンスの `.env` の
      `ALLOWED_REDIRECT_URIS` に URI を追加。
 7. `.env` の変更を反映するため、**d6e インスタンスを再デプロイ / 再起動**
@@ -467,4 +471,4 @@ Web アプリ）を付けられます。認証・セッション・プロキシ�
 - [ ] Docker STF をローカル `docker run` で検証し、次に `api_url` をインスタンスに向けて検証した
 - [ ] 反復中は `template_prompt` の下書きをローカルエージェントのルールに写した
 - [ ] `template.yaml` を URL からインストールし（プライベートリポジトリなら PAT を入力）、d6e チャットで再確認した
-- [ ] （カスタムフロントエンドの場合）本番リダイレクト URI を d6e-auth **と**インスタンスの `ALLOWED_REDIRECT_URIS` の両方に登録し、インスタンスを再起動した
+- [ ] （カスタムフロントエンドの場合）本番リダイレクト URI を www.d6e.ai **と**インスタンスの `ALLOWED_REDIRECT_URIS` の両方に登録し、インスタンスを再起動した

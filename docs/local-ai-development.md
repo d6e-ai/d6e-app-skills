@@ -38,8 +38,11 @@ from your laptop. There is no capability that exists only "inside" d6e.
 Placeholders used throughout:
 
 - `D6E_BASE_URL` — your instance, e.g. `https://cauchye.d6e.ai`
-- `D6E_AUTH_URL` — the central auth server, `https://www.d6e.ai`
 - `WORKSPACE_ID` — UUID from the workspace settings page (`${D6E_BASE_URL}/{locale}/workspaces/{id}/settings`)
+
+Account-level operations (login, redirect URI registration) happen on
+the central d6e site, [https://www.d6e.ai](https://www.d6e.ai) — there
+is no other value for it.
 
 ---
 
@@ -430,8 +433,9 @@ for the auth / session / proxy patterns). That adds these release steps:
 6. Deploy the frontend, then register its **deployed** redirect URI
    (e.g. `https://your-app.example.com/auth/callback`) in **both**
    places:
-   - **d6e-auth**: self-service for franchise owners/admins at
-     `${D6E_AUTH_URL}/{locale}/account/franchise`
+   - **[https://www.d6e.ai](https://www.d6e.ai)** (the central d6e
+     account site): self-service for franchise owners/admins at
+     `https://www.d6e.ai/{locale}/account/franchise`
      (the client's redirect URI list);
    - **the d6e instance**: add the URI to `ALLOWED_REDIRECT_URIS` in the
      instance's `.env`.
@@ -454,4 +458,4 @@ for the auth / session / proxy patterns). That adds these release steps:
 - [ ] Docker STFs validated with local `docker run`, then with `api_url` pointed at the instance
 - [ ] Draft `template_prompt` mirrored into the local agent's rules during iteration
 - [ ] `template.yaml` installed via Install from URL (PAT entered if the repo is private) and re-verified in d6e chat
-- [ ] (Custom frontend) deployed redirect URI registered on d6e-auth **and** in the instance's `ALLOWED_REDIRECT_URIS`, then the instance restarted
+- [ ] (Custom frontend) deployed redirect URI registered on www.d6e.ai **and** in the instance's `ALLOWED_REDIRECT_URIS`, then the instance restarted
