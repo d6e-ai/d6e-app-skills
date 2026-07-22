@@ -481,8 +481,12 @@ adds these release steps:
 
 ### 10-c. Marketplace listing (optional)
 
-8. Publish to the marketplace via pull request to
-   [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry).
+8. For a public GitHub plugin, add the `d6e-plugin` topic. The marketplace
+   discovers it automatically every six hours (the legacy `d6e-app` topic is
+   accepted during migration) once a valid root `template.yaml` is present.
+9. Use a pull request to
+   [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry) only
+   for verified status, private/GitLab repositories, or curated metadata.
 
 ### Checklist
 

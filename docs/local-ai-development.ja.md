@@ -492,8 +492,13 @@ Web アプリ）を付けられます。認証・セッション・プロキシ�
 
 ### 10-c. マーケットプレイス掲載（任意）
 
-8. [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
-   へのプルリクエストでマーケットプレイスに公開します。
+8. 公開GitHubプラグインの場合は、`d6e-plugin` トピックを追加します。
+   ルートに有効な `template.yaml` があれば、マーケットプレイスが
+   6時間ごとに自動検出します（移行期間中は旧 `d6e-app` トピックも利用可能）。
+9. 認証済みステータス、プライベート / GitLabリポジトリ、または
+   キュレーション済みメタデータが必要な場合のみ、
+   [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
+   へプルリクエストを作成します。
 
 ### チェックリスト
 

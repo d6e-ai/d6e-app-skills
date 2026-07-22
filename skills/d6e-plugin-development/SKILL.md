@@ -18,9 +18,10 @@ A d6e Plugin is a distributable package that configures a d6e workspace with a c
 Plugins are defined by a `template.yaml` manifest. They are installed into
 a workspace either manually (the console's **Install from URL** —
 recommended for development and team-internal plugins) or from the d6e Plugin
-Marketplace, whose listings are maintained by pull request in the
-[d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
-repository.
+Marketplace. Public GitHub repositories with the `d6e-plugin` topic are
+discovered automatically as unverified; pull requests to the
+[d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry) repository
+are used for verified status, private/GitLab repositories, and curated metadata.
 
 ## When to Use
 
@@ -582,8 +583,14 @@ self-distributed plugin.
 
 ### Path 2: Marketplace listing via d6e-plugin-registry (only when you need public listing)
 
-The marketplace does **not** discover plugins automatically. To appear in
-every d6e instance's Browse tab, submit a pull request to
+Public GitHub repositories with the `d6e-plugin` topic are discovered every
+six hours and listed as **Unverified** when their root `template.yaml` passes
+validation. Existing repositories may keep the legacy `d6e-app` topic during
+the terminology migration. No registry pull request is needed for this
+automatic path.
+
+For private/GitLab repositories, curated metadata, or verified status, submit
+a pull request to
 [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
 that adds:
 
@@ -596,9 +603,11 @@ that adds:
    (namespace, name, description, tier, category, icon, `latestVersion`)
 
 The d6e team reviews the PR and assigns the tier (**Verified** = green
-badge, listed first; **Unverified** = yellow badge). New versions and
-removals are also registry pull requests: append to `versions[]` /
-bump `latestVersion`, or delete the entry.
+badge, listed first; **Unverified** = yellow badge). For automatically
+discovered plugins, tag each version using the same `vX.Y.Z` value as the
+manifest's `version` field; the discovery action uses that tag for
+`manifestUrl`. New versions are picked up on the next discovery run. Manual
+registrations and removals remain registry pull requests.
 
 See [`docs/publishing.md`](../../docs/publishing.md) for complete YAML
 examples of both registry files.

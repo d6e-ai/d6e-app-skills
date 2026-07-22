@@ -24,7 +24,7 @@ Guides AI agents through creating d6e Plugins, including:
 - STF definitions (JS, WASM, Docker runtimes)
 - File, effect, and workflow packaging
 - Prompt separation (template_prompt vs custom_prompt)
-- Distribution: manual install (Install from URL) and marketplace listing via d6e-plugin-registry
+- Distribution: manual install (Install from URL), or automatic marketplace discovery from public GitHub repositories tagged `d6e-plugin`; verified status is managed in d6e-plugin-registry
 - Security best practices
 
 AIエージェントによる d6e プラグイン作成をガイドします:
@@ -33,7 +33,7 @@ AIエージェントによる d6e プラグイン作成をガイドします:
 - STF定義（JS、WASM、Docker ランタイム）
 - ファイル、エフェクト、ワークフローのパッケージング
 - プロンプトの分離（template_prompt vs custom_prompt）
-- 配布: 手動インストール（Install from URL）と d6e-plugin-registry 経由のマーケットプレイス掲載
+- 配布: 手動インストール（Install from URL）、または `d6e-plugin` トピックを付けた公開GitHubリポジトリの自動マーケットプレイス掲載。認証済みステータスは d6e-plugin-registry で管理
 - セキュリティのベストプラクティス
 
 ## Installation / インストール

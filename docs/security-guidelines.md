@@ -38,9 +38,12 @@ The `template_prompt` field is injected into the AI agent's system context. Mali
 
 ## Review Process
 
-- Marketplace listing happens via pull request to
+- Public GitHub repositories with the `d6e-plugin` topic (and the legacy
+  `d6e-app` topic during migration) are automatically listed as **Unverified**
+  after their root `template.yaml` passes validation
+- Verified status requires a pull request to
   [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry);
-  the d6e team reviews every submission and assigns the tier
+  the d6e team reviews the plugin and assigns the tier
 - Plugins enter as `unverified` unless the review grants `verified`
 - The d6e team reviews verified plugins for security compliance
 - Report security issues to security@d6e.ai
