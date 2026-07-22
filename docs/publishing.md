@@ -141,11 +141,11 @@ assigns the tier before merging.
 
 1. Update the `version` field in `template.yaml` and tag the release
    (`git tag v1.1.0 && git push origin v1.1.0`)
-2. Submit another merge request to d6e-plugin-registry that appends the
+2. Submit another pull request to d6e-plugin-registry that appends the
    new entry to your plugin's `versions[]` array and bumps `latestVersion`
    in `registry/index.yaml`
 
 ## Removing from Marketplace
 
-Submit a merge request that deletes your plugin's
+Submit a pull request that deletes your plugin's
 `registry/{namespace}/{name}.yaml` and its `registry/index.yaml` entry.

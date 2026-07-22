@@ -597,7 +597,7 @@ that adds:
 
 The d6e team reviews the PR and assigns the tier (**Verified** = green
 badge, listed first; **Unverified** = yellow badge). New versions and
-removals are also registry merge requests: append to `versions[]` /
+removals are also registry pull requests: append to `versions[]` /
 bump `latestVersion`, or delete the entry.
 
 See [`docs/publishing.md`](../../docs/publishing.md) for complete YAML
