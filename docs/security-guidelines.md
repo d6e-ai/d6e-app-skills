@@ -38,8 +38,8 @@ The `template_prompt` field is injected into the AI agent's system context. Mali
 
 ## Review Process
 
-- Marketplace listing happens via merge request to
-  [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry);
+- Marketplace listing happens via pull request to
+  [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry);
   the d6e team reviews every submission and assigns the tier
 - Plugins enter as `unverified` unless the review grants `verified`
 - The d6e team reviews verified plugins for security compliance

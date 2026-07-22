@@ -1,7 +1,7 @@
 # d6e Plugin Skills
 
 [![Skills](https://img.shields.io/badge/skills.sh-d6e--plugin--skills-blue)](https://skills.sh/d6e-ai/d6e-plugin-skills/d6e-plugin-development)
-[![GitLab](https://img.shields.io/badge/GitLab-d6e--ai%2Fd6e--plugin--skills-FC6D26?logo=gitlab)](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills)
+[![GitHub](https://img.shields.io/badge/GitHub-d6e--ai%2Fd6e--plugin--skills-181717?logo=github)](https://github.com/d6e-ai/d6e-plugin-skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Agent Skills for developing and publishing d6e Plugins — reusable workspace configurations for the d6e platform.
@@ -39,12 +39,12 @@ AIエージェントによる d6e プラグイン作成をガイドします:
 ## Installation / インストール
 
 ```bash
-npx skills add https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills --skill d6e-plugin-development
+npx skills add d6e-ai/d6e-plugin-skills --skill d6e-plugin-development
 ```
 
-> This repository is hosted on GitLab, so the full URL is required — the GitHub-style `owner/repo` shorthand does not work.
+The GitHub-style `owner/repo` shorthand is supported by the skills CLI.
 >
-> このリポジトリは GitLab でホストされているため、フル URL の指定が必要です。GitHub 形式の `owner/repo` 省略記法は使えません。
+GitHub 形式の `owner/repo` 省略記法も利用できます。
 
 After installation, type `@skills` in Cursor Composer to verify `d6e-plugin-development` is available.
 
@@ -102,10 +102,10 @@ npx ajv-cli validate -s schema/template.schema.json -d template.yaml
 
 ## Related Resources / 関連リソース
 
-- [d6e Platform](https://gitlab.com/cauchye/d6e-ai/d6e) — Main d6e repository / d6e メインリポジトリ
-- [d6e Plugin Marketplace](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-marketplace) — Plugin catalog website / プラグインカタログサイト
-- [d6e Plugin Registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry) — Marketplace listing data; submit an MR here to get listed / マーケットプレイス掲載データ（掲載はここへのMRで申請）
-- [d6e Docker STF Skills](https://gitlab.com/cauchye/d6e-ai/d6e-docker-stf-skills) — Skills for Docker STF development / Docker STF 開発スキル
+- [d6e Platform](https://github.com/d6e-ai/d6e) — Main d6e repository / d6e メインリポジトリ
+- [d6e Plugin Marketplace](https://github.com/d6e-ai/d6e-plugin-marketplace) — Plugin catalog website / プラグインカタログサイト
+- [d6e Plugin Registry](https://github.com/d6e-ai/d6e-plugin-registry) — Marketplace listing data; submit a PR here to get listed / マーケットプレイス掲載データ（掲載はここへのPRで申請）
+- [d6e Docker STF Skills](https://github.com/d6e-ai/d6e-docker-stf-skills) — Skills for Docker STF development / Docker STF 開発スキル
 - [skills.sh](https://skills.sh) — The Open Agent Skills Ecosystem / オープンAgent Skillsエコシステム
 
 ## Contributing / コントリビューション

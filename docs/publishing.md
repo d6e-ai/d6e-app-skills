@@ -5,16 +5,16 @@ There are two ways to get an plugin into a d6e workspace:
 1. **Install from URL (manual install)** — recommended for development,
    testing, and any plugin you distribute yourself. No registration
    anywhere is needed.
-2. **d6e Plugin Marketplace listing** — submit a merge request to the
-   [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
+2. **d6e Plugin Marketplace listing** — submit a pull request to the
+   [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
    repository. This is currently the **only** way to be listed in the
    marketplace.
 
 > **Note**: the marketplace used to auto-discover plugins from public
 > GitHub repositories tagged with the `d6e-plugin` topic. That pipeline no
-> longer operates (the d6e-ai repositories moved to GitLab) and this
+> longer operates (the d6e-ai repositories are now managed on GitHub) and this
 > guide assumes it does not exist. Automated discovery may return in
-> some form in the future; until then, registry merge requests are the
+> some form in the future; until then, registry pull requests are the
 > only listing path.
 
 ## Install from URL (Recommended for Development)
@@ -42,7 +42,7 @@ listing just to use an plugin.
 
 To make your plugin appear in every d6e instance's **Browse** tab, add it
 to the registry data in
-[d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry).
+[d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry).
 
 ### Prerequisites
 
@@ -54,7 +54,7 @@ to the registry data in
 
 ### Step 1: Fork d6e-plugin-registry and add your plugin
 
-Add **two** things in one merge request:
+Add **two** things in one pull request:
 
 1. A per-plugin detail file `registry/{namespace}/{name}.yaml`:
 
@@ -65,7 +65,7 @@ description:
   en-US: One-line description of what the plugin does.
   ja-JP: プラグインの内容を一行で説明。
 tier: unverified # the d6e team assigns the final tier during review
-repo: https://gitlab.com/your-org/d6e-plugin-your-plugin
+repo: https://github.com/your-org/d6e-plugin-your-plugin
 category: business # business | analytics | productivity | ...
 icon: package # icon name shown in the Browse tab
 screenshots: []
@@ -74,7 +74,7 @@ versions:
     releaseDate: "2026-07-01"
     # Raw URL of the template.yaml for this version — this is what a
     # d6e instance downloads when a user clicks Install:
-    manifestUrl: https://gitlab.com/your-org/d6e-plugin-your-plugin/-/raw/v1.0.0/template.yaml
+    manifestUrl: https://raw.githubusercontent.com/your-org/d6e-plugin-your-plugin/v1.0.0/template.yaml
     changelog:
       en-US: Initial release
       ja-JP: 初回リリース
@@ -117,9 +117,9 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-### Step 2: Submit the merge request
+### Step 2: Submit the pull request
 
-Open a merge request against `main` of d6e-plugin-registry. The d6e team
+Open a pull request against `main` of d6e-plugin-registry. The d6e team
 reviews the plugin (schema validity, security, description quality) and
 assigns the tier before merging.
 

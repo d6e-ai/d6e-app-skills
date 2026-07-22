@@ -66,7 +66,7 @@ d6e は同じ API 境界線の両側から拡張できますが、本ガイド�
 
 後者を作る場合、あるいはフロントエンド・インスタンス・中央アカウント
 サイトの関係が曖昧な場合は、まず d6e-custom-frontend-skills リポジトリの
-[カスタムフロントエンドと d6e インスタンスの関係](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.ja.md)
+[カスタムフロントエンドと d6e インスタンスの関係](https://github.com/d6e-ai/d6e-custom-frontend-skills/blob/main/docs/frontend-and-instance.ja.md)
 を読んでから、ワークスペース側の作業のために本ガイドへ戻ってきてください。
 
 ---
@@ -380,7 +380,7 @@ echo '{
 - ワークフローに組み込む前に、インスタンスが pull できるレジストリへ
   マルチアーキテクチャ（amd64 + arm64）イメージを publish してください。
   開発・テスト・公開の完全なガイドは
-  [d6e-docker-stf-skills](https://gitlab.com/cauchye/d6e-ai/d6e-docker-stf-skills)
+  [d6e-docker-stf-skills](https://github.com/d6e-ai/d6e-docker-stf-skills)
   リポジトリを参照してください。
 
 ---
@@ -467,9 +467,9 @@ MCP: `d6e_execute_workflow`。実験中の作成・更新は `d6e_create_workflo
 
 プラグインには専用フロントエンド（インスタンスの API を呼ぶ独自の
 Web アプリ）を付けられます。認証・セッション・プロキシのパターンは
-[d6e-custom-frontend-skills](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills)
+[d6e-custom-frontend-skills](https://github.com/d6e-ai/d6e-custom-frontend-skills)
 を、フロントエンド・インスタンス・中央アカウントサイトの関係の全体像は
-[frontend-and-instance.ja.md](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.ja.md)
+[frontend-and-instance.ja.md](https://github.com/d6e-ai/d6e-custom-frontend-skills/blob/main/docs/frontend-and-instance.ja.md)
 を参照してください。この場合、公開までに次のステップが追加されます:
 
 5. 稼働中のインスタンスに向けてフロントエンドを実装します。開発中は
@@ -492,8 +492,8 @@ Web アプリ）を付けられます。認証・セッション・プロキシ�
 
 ### 10-c. マーケットプレイス掲載（任意）
 
-8. [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
-   へのマージリクエストでマーケットプレイスに公開します。
+8. [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
+   へのプルリクエストでマーケットプレイスに公開します。
 
 ### チェックリスト
 
