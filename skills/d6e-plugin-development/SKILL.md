@@ -18,9 +18,10 @@ A d6e Plugin is a distributable package that configures a d6e workspace with a c
 Plugins are defined by a `template.yaml` manifest. They are installed into
 a workspace either manually (the console's **Install from URL** —
 recommended for development and team-internal plugins) or from the d6e Plugin
-Marketplace, whose listings are maintained by merge request in the
-[d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
-repository.
+Marketplace. Public GitHub repositories with the `d6e-plugin` topic are
+discovered automatically as unverified; pull requests to the
+[d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry) repository
+are used for verified status, private/GitLab repositories, and curated metadata.
 
 ## When to Use
 
@@ -561,8 +562,8 @@ Full guide (per-agent MCP config, runtime environment details,
 behaviour parity with the d6e chat agent, and the release steps for
 plugins with a custom frontend — deployed redirect URI registration and
 instance restart):
-[docs/local-ai-development.md](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills/-/blob/main/docs/local-ai-development.md)
-([日本語版](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-skills/-/blob/main/docs/local-ai-development.ja.md)).
+[docs/local-ai-development.md](https://github.com/d6e-ai/d6e-plugin-skills/blob/main/docs/local-ai-development.md)
+([日本語版](https://github.com/d6e-ai/d6e-plugin-skills/blob/main/docs/local-ai-development.ja.md)).
 
 ## Distributing Your Plugin
 
@@ -582,30 +583,38 @@ self-distributed plugin.
 
 ### Path 2: Marketplace listing via d6e-plugin-registry (only when you need public listing)
 
-The marketplace does **not** discover plugins automatically. To appear in
-every d6e instance's Browse tab, submit a merge request to
-[d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
+Public GitHub repositories with the `d6e-plugin` topic are discovered every
+six hours and listed as **Unverified** when their root `template.yaml` passes
+validation. Existing repositories may keep the legacy `d6e-app` topic during
+the terminology migration. No registry pull request is needed for this
+automatic path.
+
+For private/GitLab repositories, curated metadata, or verified status, submit
+a pull request to
+[d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
 that adds:
 
 1. `registry/{namespace}/{name}.yaml` — the plugin's detail page: name,
    namespace, localized `description`/`readme`/`changelog`, `category`,
    `icon`, and a `versions[]` array whose `manifestUrl` points at the
    raw `template.yaml` of a **tagged release**
-   (e.g. `https://gitlab.com/your-org/d6e-plugin-your-plugin/-/raw/v1.0.0/template.yaml`)
+   (e.g. `https://raw.githubusercontent.com/your-org/d6e-plugin-your-plugin/v1.0.0/template.yaml`)
 2. A matching summary entry in `registry/index.yaml`
    (namespace, name, description, tier, category, icon, `latestVersion`)
 
-The d6e team reviews the MR and assigns the tier (**Verified** = green
-badge, listed first; **Unverified** = yellow badge). New versions and
-removals are also registry merge requests: append to `versions[]` /
-bump `latestVersion`, or delete the entry.
+The d6e team reviews the PR and assigns the tier (**Verified** = green
+badge, listed first; **Unverified** = yellow badge). For automatically
+discovered plugins, tag each version using the same `vX.Y.Z` value as the
+manifest's `version` field; the discovery action uses that tag for
+`manifestUrl`. New versions are picked up on the next discovery run. Manual
+registrations and removals remain registry pull requests.
 
 See [`docs/publishing.md`](../../docs/publishing.md) for complete YAML
 examples of both registry files.
 
 ### How d6e Instances Find Listed Plugins
 
-1. Each d6e instance fetches `registry/index.yaml` via the marketplace HTTP API (`https://marketplace.d6e.ai/api/registry`), which serves the canonical YAMLs stored in [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry)
+1. Each d6e instance fetches `registry/index.yaml` via the marketplace HTTP API (`https://marketplace.d6e.ai/api/registry`), which serves the canonical YAMLs stored in [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
 2. The Browse tab on the Plugins page displays all entries
 3. When a user clicks Install, d6e fetches the version's `manifestUrl` → gets `template.yaml` → creates resources via Rust API
 

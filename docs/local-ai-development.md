@@ -63,7 +63,7 @@ covers only the first:
 
 If you are building the latter, or are unsure how the frontend, the
 instance, and the central account site relate, read
-[Custom Frontends and the d6e Instance](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.md)
+[Custom Frontends and the d6e Instance](https://github.com/d6e-ai/d6e-custom-frontend-skills/blob/main/docs/frontend-and-instance.md)
 in the d6e-custom-frontend-skills repository first, then come back here
 for the workspace side.
 
@@ -371,7 +371,7 @@ echo '{
   `d6e_describe_stf` can report your input schema.
 - Publish multi-arch (amd64 + arm64) images to a registry the instance
   can pull from before wiring the STF into a workflow. See the
-  [d6e-docker-stf-skills](https://gitlab.com/cauchye/d6e-ai/d6e-docker-stf-skills)
+  [d6e-docker-stf-skills](https://github.com/d6e-ai/d6e-docker-stf-skills)
   repository for the full development / testing / publishing guides.
 
 ---
@@ -455,9 +455,9 @@ Once the pieces work from your local agent, the path to release is:
 
 A plugin can come with a dedicated frontend (its own web app calling the
 instance's APIs — see
-[d6e-custom-frontend-skills](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills)
+[d6e-custom-frontend-skills](https://github.com/d6e-ai/d6e-custom-frontend-skills)
 for the auth / session / proxy patterns, and
-[frontend-and-instance.md](https://gitlab.com/cauchye/d6e-ai/d6e-custom-frontend-skills/-/blob/main/docs/frontend-and-instance.md)
+[frontend-and-instance.md](https://github.com/d6e-ai/d6e-custom-frontend-skills/blob/main/docs/frontend-and-instance.md)
 for how the frontend, instance, and central account site relate). That
 adds these release steps:
 
@@ -481,8 +481,12 @@ adds these release steps:
 
 ### 10-c. Marketplace listing (optional)
 
-8. Publish to the marketplace via merge request to
-   [d6e-plugin-registry](https://gitlab.com/cauchye/d6e-ai/d6e-plugin-registry).
+8. For a public GitHub plugin, add the `d6e-plugin` topic. The marketplace
+   discovers it automatically every six hours (the legacy `d6e-app` topic is
+   accepted during migration) once a valid root `template.yaml` is present.
+9. Use a pull request to
+   [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry) only
+   for verified status, private/GitLab repositories, or curated metadata.
 
 ### Checklist
 
