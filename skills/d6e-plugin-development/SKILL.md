@@ -1,6 +1,18 @@
 ---
 name: d6e-plugin-development
 description: Creates d6e Plugin packages — reusable workspace configurations with prompts, STFs, files, effects, and workflows. Use when building a distributable d6e Plugin, creating template.yaml manifests, or packaging workspace setups for the d6e Plugin Marketplace.
+keywords:
+  - pin_version
+  - plugin install
+  - re-pin
+  - workflow versioning
+  - Fetch timeout
+  - Effect timeout
+  - output_schema
+  - saas-proxy-download
+  - d6e_download_external_file
+  - custom frontend
+  - redirect URI
 ---
 
 # d6e Plugin Development
@@ -617,6 +629,17 @@ examples of both registry files.
 1. Each d6e instance fetches `registry/index.yaml` via the marketplace HTTP API (`https://marketplace.d6e.ai/api/registry`), which serves the canonical YAMLs stored in [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry)
 2. The Browse tab on the Plugins page displays all entries
 3. When a user clicks Install, d6e fetches the version's `manifestUrl` → gets `template.yaml` → creates resources via Rust API
+
+## References
+
+Detailed topics that are easy to misconfigure during plugin development:
+
+| Topic | Reference |
+|-------|-----------|
+| `pin_version`, latest-at-runtime, re-install re-pin scope | [references/pinning-and-versions.md](references/pinning-and-versions.md) |
+| Input Fetch timeout (60 s cap) vs Effect HTTP (no timeout); `output_schema` failures | [references/timeouts.md](references/timeouts.md) |
+| MCP `d6e_download_external_file` ↔ `saas-proxy-download` ↔ files download | [references/saas-and-downloads.md](references/saas-and-downloads.md) |
+| Plugin + custom frontend release (redirect URI, instance restart) | [references/custom-frontend-combo.md](references/custom-frontend-combo.md) |
 
 ## Troubleshooting
 
