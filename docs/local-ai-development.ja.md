@@ -182,8 +182,14 @@ WHERE table_schema = 'user_data'
 for Select operation on table '…'」エラーは、そのテーブル・その主体に
 対する許可ポリシーがまだワークスペースに無いことを意味します —
 コンソール（管理 → ポリシー）か `d6e_create_policy` /
-`d6e_create_policy_group` で作成するか、`template.yaml` の `policies:`
-セクションで配布してください。DDL（`CREATE TABLE` など）はさらに
+`d6e_create_policy_group` で **インストール後に** 作成してください。
+
+> **警告 — `template.yaml` の `policies:` は未実装です。** プラグイン
+> インストーラはマニフェストからポリシーを作成しません。詳細は
+> [policy-and-instant-run.md](../skills/d6e-plugin-development/references/policy-and-instant-run.md)
+> （instant-run は **User** 主体、ワークフロー STF は **Stf** 主体）。
+
+DDL（`CREATE TABLE` など）はさらに
 ワークスペースの DDL ポリシーグループ設定で制御されます。
 
 ---

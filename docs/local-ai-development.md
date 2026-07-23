@@ -177,8 +177,15 @@ WHERE table_schema = 'user_data'
 access is deny-by-default: a `POLICY_DENIED` / "No policy found for
 Select operation on table '…'" error means the workspace has no allow
 policy for that table and subject yet — create one in the console
-(管理 → ポリシー) or via `d6e_create_policy` / `d6e_create_policy_group`,
-or ship it in `template.yaml`'s `policies:` section. DDL
+(管理 → ポリシー) or via `d6e_create_policy` / `d6e_create_policy_group`.
+
+> **WARNING — `policies:` in `template.yaml` is NOT implemented.** The plugin
+> installer does not create policies from the manifest. Always create policy
+> groups and allow rules **after install** (console, MCP, or REST). See
+> [skills/d6e-plugin-development/references/policy-and-instant-run.md](../skills/d6e-plugin-development/references/policy-and-instant-run.md)
+> (instant-run uses **User** subject; workflow STFs use **Stf** subject).
+
+DDL
 (`CREATE TABLE` etc.) is additionally gated by the workspace's DDL
 policy-group setting.
 
