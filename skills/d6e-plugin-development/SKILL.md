@@ -22,7 +22,7 @@ keywords:
 A d6e Plugin is a distributable package that configures a d6e workspace with a combination of:
 
 - **Template Prompt** — System prompt injected into the AI agent's context
-- **STFs** (State Transition Functions) — Custom logic (JS, WASM, or Docker)
+- **STFs** (State Transition Functions) — Custom logic (**JS or Docker**; see [unsupported-and-phantom.md](references/unsupported-and-phantom.md) — `wasm` is not supported at runtime)
 - **Files** — Reference documents, templates, or datasets (uploaded to workspace storage)
 - **Effects** — External API integrations with header/body mapping
 - **Workflows** — Pipelines combining input steps, STF steps, and effect steps
@@ -34,6 +34,8 @@ Marketplace. Public GitHub repositories with the `d6e-plugin` topic are
 discovered automatically as unverified; pull requests to the
 [d6e-plugin-registry](https://github.com/d6e-ai/d6e-plugin-registry) repository
 are used for verified status, private/GitLab repositories, and curated metadata.
+
+**Before authoring:** read [references/unsupported-and-phantom.md](references/unsupported-and-phantom.md) for fields that look supported in schema or docs but are **not implemented** or **misleading** (policies in template, `wasm`, `pin_version`, workflow `input_schema`, etc.).
 
 ## When to Use
 
@@ -315,14 +317,14 @@ Rules:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | string | Yes | STF identifier (used in workflow references) |
-| `runtime` | `js` \| `wasm` \| `docker` | Yes | Execution runtime |
+| `runtime` | `js` \| `docker` | Yes | Execution runtime (**use `js` or `docker` only** — `wasm` installs but fails at run with `UnsupportedRuntime`; see [unsupported-and-phantom.md](references/unsupported-and-phantom.md)) |
 | `description` | string | Yes | What this STF does |
-| `source` | string | For js/wasm | Relative path to source file (installer reads and base64-encodes) |
+| `source` | string | For `js` | Relative path to source file (installer reads and base64-encodes) |
 | `image` | string | For docker | Docker image reference |
 | `command` | array of strings | No | Docker command override (e.g., `["python3", "main.py"]`) — a single string is **not** accepted |
 | `env` | object | No | Environment variables (docker only). Each key becomes an input field in the install dialog; values entered there are stored as encrypted secrets |
-| `input_schema` | object | No | JSON Schema for input validation |
-| `output_schema` | object | No | JSON Schema for output validation |
+| `input_schema` | object | No | JSON Schema (stored on version; **not validated at execute** — see [unsupported-and-phantom.md](references/unsupported-and-phantom.md)) |
+| `output_schema` | object | No | JSON Schema for output validation (**validated at execute** — see [references/timeouts.md](references/timeouts.md)) |
 
 **Note**: The `source` file is read by the installer, base64-encoded, and sent to `POST /api/v1/stfs` as the `code` field. The file itself is not stored — only the encoded content.
 
@@ -341,7 +343,7 @@ on stderr with non-zero exit).
 | `description` | string | Yes | What this file is for |
 | `path` | string | Yes | Relative path to the file (installer uploads via multipart) |
 
-**Note**: Files are uploaded to workspace-scoped storage via `POST /api/v1/workspaces/{workspace_id}/files/multipart` (multipart/form-data). After upload, files are referenced by UUID (e.g., in `InputSource::File { id: UUID }` within workflows) — but see the Input Step caution below: bundled files get fresh UUIDs at install, so workflows cannot reference them by UUID ahead of time. Bundled files are primarily for the AI agent to discover by name via the file listing.
+**Note**: Files are uploaded to workspace-scoped storage via `POST /api/v1/workspaces/{workspace_id}/files/multipart` (multipart/form-data). After upload, files are referenced by UUID (e.g., in `InputSource::File { id: UUID }` within workflows) — bundled files get **fresh UUIDs on every install**; see [references/bundled-files-in-workflows.md](references/bundled-files-in-workflows.md). Bundled files are primarily for the AI agent to discover by name via the file listing.
 
 ### Effect Definition
 
@@ -355,7 +357,7 @@ on stderr with non-zero exit).
 | `header_mappings` | object | Yes | Header mappings (see syntax below) |
 | `body_mappings` | object | Yes | JSON body field mappings (see syntax below) |
 | `query_mappings` | object | No | URL query parameter mappings (see syntax below) |
-| `input_schema` | object | No | JSON Schema for input validation |
+| `input_schema` | object | No | JSON Schema (stored; **not validated at execute** — [unsupported-and-phantom.md](references/unsupported-and-phantom.md)) |
 
 **Mapping syntax** (applies to `header_mappings`, `body_mappings`, `query_mappings`):
 
@@ -387,12 +389,12 @@ there is no standalone effect execution API.
 |-------|------|----------|-------------|
 | `name` | string | Yes | Step name (referenced as `$sources.{name}` in mappings) |
 | `source` | object | Yes | Input source definition |
-| `content_type` | string | No | Content-type hint for File sources (`json` / `text` / binary) |
+| `content_type` | string | No | **No-op** — MIME comes from storage only; see [unsupported-and-phantom.md](references/unsupported-and-phantom.md) |
 
 Input source types:
 - `{ type: Library, name: "library-name" }` — Load a pre-registered STF library; resolves to `{ code, types, version }`
-- `{ type: File, id: "UUID" }` — Load a file from workspace storage by UUID. **Caution**: the installer does NOT rewrite this — the UUID is passed through as-is, so it can only reference a file that already exists in the target workspace. It cannot reference files bundled in the plugin's `files` section (those get fresh UUIDs at install time)
-- `{ type: Fetch, url: "...", method: "GET", headers: {...}, body: ..., timeout_secs: 30 }` — Fetch from an external HTTP endpoint at execution time; resolves to the parsed JSON response body
+- `{ type: File, id: "UUID" }` — Load a file from workspace storage by UUID. **Caution**: the installer does NOT rewrite this — see [references/bundled-files-in-workflows.md](references/bundled-files-in-workflows.md)
+- `{ type: Fetch, url: "...", method: "GET", headers: {...}, body: ..., timeout_secs: 30 }` — Fetch from an external HTTP endpoint at execution time; resolves to the parsed JSON response body (**non-2xx fails**; 60 s / 5 MB limits — [references/timeouts.md](references/timeouts.md), [references/effect-semantics.md](references/effect-semantics.md))
 
 #### STF Step
 
@@ -410,7 +412,12 @@ Input source types:
 
 Execution order: input steps run first (in parallel), then STF steps run
 sequentially in listed order, then effect steps run (in parallel). The
-workflow's result is the **last STF step's output**.
+workflow's result is the **last STF step's output** — Effect results are
+discarded from the return value ([references/effect-semantics.md](references/effect-semantics.md)).
+
+The installer sets **`pin_version: false`** on all bundled steps; template.yaml
+cannot override ([references/pinning-and-versions.md](references/pinning-and-versions.md)).
+Workflow-level `input_schema` is not supported in template.yaml ([references/unsupported-and-phantom.md](references/unsupported-and-phantom.md)).
 
 #### Field Mapping
 
@@ -553,7 +560,9 @@ also callable as plain REST (`Authorization: Bearer d6e_...` +
 - **Workspace SQL** — remote, real DB: `d6e_sql` /
   `POST /api/v1/workspaces/{id}/sql`. Table access is deny-by-default;
   `POLICY_DENIED` means the workspace needs an allow policy (console →
-  Admin → Policies, or `policies:` in template.yaml).
+  Admin → Policies, or MCP `d6e_create_policy_group` / `d6e_create_policy` —
+  **`policies:` in template.yaml is NOT implemented**; see
+  [references/policy-and-instant-run.md](references/policy-and-instant-run.md)).
 - **JS STFs** — do NOT emulate QuickJS locally; use
   `d6e_instant_run_stf` / `POST /api/v1/stfs/instant-run` with
   base64-encoded code to run drafts in the real runtime against real
@@ -636,6 +645,11 @@ Detailed topics that are easy to misconfigure during plugin development:
 
 | Topic | Reference |
 |-------|-----------|
+| **Phantom / unsupported template fields** (`policies:`, `wasm`, `pin_version`, schemas) | [references/unsupported-and-phantom.md](references/unsupported-and-phantom.md) |
+| Effect HTTP (no status check, no timeout, return value) | [references/effect-semantics.md](references/effect-semantics.md) |
+| Policies: instant-run User vs workflow Stf subject | [references/policy-and-instant-run.md](references/policy-and-instant-run.md) |
+| Bundled file UUIDs and workflow File inputs | [references/bundled-files-in-workflows.md](references/bundled-files-in-workflows.md) |
+| SaaS binaries, Effect vs MCP vs Docker, instance skills | [references/cross-package-recipes.md](references/cross-package-recipes.md) |
 | `pin_version`, latest-at-runtime, re-install re-pin scope | [references/pinning-and-versions.md](references/pinning-and-versions.md) |
 | Input Fetch timeout (60 s cap) vs Effect HTTP (no timeout); `output_schema` failures | [references/timeouts.md](references/timeouts.md) |
 | MCP `d6e_download_external_file` ↔ `saas-proxy-download` ↔ files download | [references/saas-and-downloads.md](references/saas-and-downloads.md) |
@@ -647,7 +661,7 @@ Detailed topics that are easy to misconfigure during plugin development:
 
 - Check YAML syntax (use a YAML linter)
 - Verify all required fields are present
-- Ensure `runtime` is one of: `js`, `wasm`, `docker`
+- Ensure `runtime` is `js` or `docker` (`wasm` is not supported at runtime)
 
 ### Install error: "Validation failed ... invalid_semver" on an Effect or STF
 
@@ -701,12 +715,14 @@ Detailed topics that are easy to misconfigure during plugin development:
 
 ### Docker STF fails with POLICY_DENIED on SQL
 
-- Plugin installation does NOT create SQL policies. After installing, create
-  a policy group containing the installed STF (its id is visible on the
-  workspace's STFs page) and add allow policies per table + operation —
-  see the `d6e-docker-stf-development` skill
-- Ask the workspace agent to do this, or use the MCP tools
-  (`d6e_create_policy_group` with `stf_ids`, then `d6e_create_policy`)
+- Plugin installation does NOT create SQL policies (`policies:` in template.yaml
+  is not implemented). After installing, create a policy group containing the
+  installed STF (its id is visible on the workspace's STFs page) and add allow
+  policies per table + operation — see
+  [references/policy-and-instant-run.md](references/policy-and-instant-run.md)
+  and the `d6e-docker-stf-development` skill
+- Instant-run (`d6e_instant_run_stf`) uses **User** policies; workflow execute
+  uses **Stf** policies — test both paths
 
 ### "Template prompt too long"
 

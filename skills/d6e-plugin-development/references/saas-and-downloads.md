@@ -1,5 +1,11 @@
 # SaaS binary downloads from plugins and agents
 
+Related:
+
+- [cross-package-recipes.md](cross-package-recipes.md) — wiring downloads into plugin workflows
+- [bundled-files-in-workflows.md](bundled-files-in-workflows.md) — File UUIDs and `$input` patterns
+- [effect-semantics.md](effect-semantics.md) — why Effect is not for binaries
+
 Plugins and local AI agents often need to pull binary files (PDF, XLSX, images)
 from connected SaaS providers (Google Workspace, Box, GitHub, …). JSON-oriented
 calls use `d6e_call_external_api` / `POST /api/v1/saas-proxy`; binary content
@@ -61,7 +67,10 @@ on Vercel/Cloudflare, and reference implementations live in
 
 - Workflow **Fetch** input steps are for JSON HTTP responses (5 MB cap, 60 s
   timeout) — not for binary SaaS downloads. Use agent/MCP download tools or a
-  custom frontend proxy for binaries.
+  custom frontend proxy for binaries. Full recipe:
+  [cross-package-recipes.md](cross-package-recipes.md).
+- Docker STFs cannot call `saas-proxy-download`; prefetch via agent/MCP then pass
+  storage file id into the workflow — see [bundled-files-in-workflows.md](bundled-files-in-workflows.md).
 - Ensure the target workspace has the SaaS provider connected (Console → Admin
   → SaaS integrations) before relying on download tools in demos or docs.
 - For Google Drive files already mirrored in `drive_files`, prefer

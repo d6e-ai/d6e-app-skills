@@ -21,7 +21,7 @@ This repository contains **Agent Skills** that teach Claude and Cursor how to he
 Guides AI agents through creating d6e Plugins, including:
 
 - `template.yaml` manifest structure and all fields
-- STF definitions (JS, WASM, Docker runtimes)
+- STF definitions (**JS and Docker** runtimes; `wasm` is not supported at runtime — see skill references)
 - File, effect, and workflow packaging
 - Prompt separation (template_prompt vs custom_prompt)
 - Distribution: manual install (Install from URL), or automatic marketplace discovery from public GitHub repositories tagged `d6e-plugin`; verified status is managed in d6e-plugin-registry
@@ -30,7 +30,7 @@ Guides AI agents through creating d6e Plugins, including:
 AIエージェントによる d6e プラグイン作成をガイドします:
 
 - `template.yaml` マニフェストの構造と全フィールド
-- STF定義（JS、WASM、Docker ランタイム）
+- STF定義（**JS・Docker** ランタイム；`wasm` は実行時未対応 — スキル参照を確認）
 - ファイル、エフェクト、ワークフローのパッケージング
 - プロンプトの分離（template_prompt vs custom_prompt）
 - 配布: 手動インストール（Install from URL）、または `d6e-plugin` トピックを付けた公開GitHubリポジトリの自動マーケットプレイス掲載。認証済みステータスは d6e-plugin-registry で管理

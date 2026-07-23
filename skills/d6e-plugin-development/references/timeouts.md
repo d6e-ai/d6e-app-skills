@@ -1,5 +1,11 @@
 # Timeouts and output validation in plugin workflows
 
+Related:
+
+- [effect-semantics.md](effect-semantics.md) — Effect HTTP has no timeout; status codes not checked
+- [unsupported-and-phantom.md](unsupported-and-phantom.md) — STF `input_schema` stored but not validated at execute
+- [cross-package-recipes.md](cross-package-recipes.md) — Fetch vs Effect vs MCP for external data
+
 ## Input Fetch steps (`input_steps` with `type: Fetch`)
 
 Workflow input steps can fetch external HTTP endpoints at execution time:
@@ -42,6 +48,9 @@ Implications:
 - Prefer idempotent Effect targets, reasonable provider-side limits, and
   defensive STF preprocessing when latency matters.
 
+See [effect-semantics.md](effect-semantics.md) for full Effect vs Fetch behavior
+(status codes, return value, non-JSON bodies).
+
 For comparison:
 
 | Mechanism | Timeout configured? | Typical use |
@@ -49,6 +58,14 @@ For comparison:
 | Input `Fetch` | Yes — clamped to 60 s max | Load JSON/config at workflow start |
 | Effect HTTP | **No** | Call Slack, webhooks, REST APIs from effect steps |
 | Docker STF | Separate env (`STF_DOCKER_TIMEOUT_SECS`) | Containerized logic |
+
+## STF `input_schema` vs `output_schema`
+
+STF `input_schema` may be stored on the version record but is **not validated**
+at workflow execution time. Do not rely on it for runtime guards — validate in
+STF code or document expected input shape.
+
+Only **`output_schema`** is enforced at execute time (below).
 
 ## STF `output_schema` validation
 

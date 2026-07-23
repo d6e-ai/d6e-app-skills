@@ -1,5 +1,9 @@
 # Workflow step pinning and version resolution
 
+Related:
+
+- [unsupported-and-phantom.md](unsupported-and-phantom.md) — `pin_version` cannot be set from `template.yaml`
+
 ## Default: follow latest (`pin_version: false`)
 
 Each workflow STF step stores a concrete `stf_version_id` (and each Effect
@@ -14,12 +18,14 @@ version ID is therefore a stable anchor; runtime behavior tracks the newest
 STF/Effect code unless you opt into pinning.
 
 Set `pin_version: true` only when you need reproducible, version-locked runs
-(audits, regression tests, compliance).
+(audits, regression tests, compliance) — via **API/MCP workflow updates** after
+install. The plugin template **cannot** set this flag (see below).
 
 ## Plugin installer behavior
 
 When a plugin is installed (or re-installed) from `template.yaml`, the
-installer writes every bundled workflow step with `pin_version: false`:
+installer writes every bundled workflow step with `pin_version: false` —
+there is **no template.yaml field** to override this:
 
 - STF steps get the freshly upserted `stf_version_id` plus `pin_version: false`.
 - Effect steps get the freshly upserted `effect_version_id` plus
