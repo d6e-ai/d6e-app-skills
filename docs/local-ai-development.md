@@ -94,6 +94,17 @@ Sanity check:
 curl -s ${D6E_BASE_URL}/api/v1/workspaces -H "Authorization: Bearer ${D6E_API_KEY}"
 ```
 
+### Provider API keys (Gemini, OpenAI, embeddings) — not required locally
+
+When developing plugins or using the local agent harness against a d6e
+instance, you do **not** need Gemini, OpenAI, or other embedding-provider
+API keys in your project or agent environment. The instance holds Gateway
+keys and routes model calls for the hosted chat agent.
+
+Your **`D6E_API_KEY`** (`d6e_…`) authenticates you to d6e **workspace
+APIs** only — SQL, STFs, workflows, SaaS proxy, file storage, and MCP
+tools. It is not an LLM provider key.
+
 ---
 
 ## 2. Connect your agent to the instance MCP server (recommended)

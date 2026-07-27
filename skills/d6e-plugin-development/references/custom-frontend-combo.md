@@ -20,6 +20,10 @@ session cookies, and `/api/*` proxy routes are documented in
 start with
 [`docs/frontend-and-instance.md`](https://github.com/d6e-ai/d6e-custom-frontend-skills/blob/main/docs/frontend-and-instance.md)
 and the `d6e-auth-integration` / `d6e-workspace-api-client` skills.
+To connect SaaS providers (Google Workspace, freee, Box, …) from the
+frontend, follow
+[`saas-oauth-bff.md`](https://github.com/d6e-ai/d6e-custom-frontend-skills/blob/main/skills/d6e-workspace-api-client/references/saas-oauth-bff.md)
+(OAuth/PAT via same-origin Cookie BFF routes).
 
 ## Release steps when both exist
 
