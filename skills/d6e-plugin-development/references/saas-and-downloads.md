@@ -36,14 +36,14 @@ Example REST shape (after obtaining a Bearer token and workspace id):
 ```bash
 curl -s -X POST "${D6E_BASE_URL}/api/v1/saas-proxy-download" \
   -H "Authorization: Bearer ${D6E_API_KEY}" \
-  -H "X-Workspace-ID: ${WORKSPACE_ID}" \
   -H "Content-Type: application/json" \
-  -d '{
-    "provider": "google_workspace",
-    "method": "GET",
-    "path": "/drive/v3/files/FILE_ID?alt=media"
-  }'
-# -> { "id": "<storage-file-uuid>", "suggested_filename": "...", ... }
+  -d "{
+    \"workspace_id\": \"${WORKSPACE_ID}\",
+    \"provider\": \"google_workspace\",
+    \"method\": \"GET\",
+    \"path\": \"/drive/v3/files/FILE_ID?alt=media\"
+  }"
+# -> { "id": "<storage-file-uuid>", "filename": "...", ... }
 ```
 
 ## Custom frontends must proxy downloads
